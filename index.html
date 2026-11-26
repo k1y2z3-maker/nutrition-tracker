@@ -1,0 +1,2507 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Pure Nutrition Tracker — 個人飲食與熱量追蹤</title>
+  <style>
+    /* ==========================================================================
+       1. 設計系統與色彩變數 (支援淺色/深色主題無縫切換)
+       ========================================================================== */
+    :root {
+      --bg-page: #f4f6f9;
+      --bg-card: #ffffff;
+      --bg-subtle: #eef1f5;
+      --bg-input: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+
+      --accent-blue: #2563eb;
+      --accent-blue-hover: #1d4ed8;
+      --accent-blue-soft: rgba(37, 99, 235, 0.1);
+
+      --status-green: #10b981;
+      --status-green-soft: rgba(16, 185, 129, 0.14);
+      --status-amber: #f59e0b;
+      --status-amber-soft: rgba(245, 158, 11, 0.15);
+      --status-red: #ef4444;
+      --status-red-soft: rgba(239, 68, 68, 0.14);
+
+      /* 餐別柔和標籤色 */
+      --meal-breakfast-bg: #fef3c7;
+      --meal-breakfast-fg: #b45309;
+      --meal-lunch-bg: #dcfce7;
+      --meal-lunch-fg: #15803d;
+      --meal-dinner-bg: #dbeafe;
+      --meal-dinner-fg: #1d4ed8;
+      --meal-snack-bg: #f3e8ff;
+      --meal-snack-fg: #7e22ce;
+
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    [data-theme="dark"] {
+      --bg-page: #0b0f19;
+      --bg-card: #151c2c;
+      --bg-subtle: #1e293b;
+      --bg-input: #0f172a;
+      --border-color: #273549;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #60a5fa;
+      --accent-blue-soft: rgba(59, 130, 246, 0.16);
+
+      --status-green: #34d399;
+      --status-green-soft: rgba(52, 211, 153, 0.16);
+      --status-amber: #fbbf24;
+      --status-amber-soft: rgba(251, 191, 36, 0.16);
+      --status-red: #f87171;
+      --status-red-soft: rgba(248, 113, 113, 0.16);
+
+      --meal-breakfast-bg: rgba(245, 158, 11, 0.2);
+      --meal-breakfast-fg: #fcd34d;
+      --meal-lunch-bg: rgba(16, 185, 129, 0.2);
+      --meal-lunch-fg: #6ee7b7;
+      --meal-dinner-bg: rgba(59, 130, 246, 0.2);
+      --meal-dinner-fg: #93c5fd;
+      --meal-snack-bg: rgba(168, 85, 247, 0.2);
+      --meal-snack-fg: #d8b4fe;
+
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ==========================================================================
+       2. 基礎重置與全域排版 (防橫向捲動、手機單手操作最佳化)
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      line-height: 1.5;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 12px 14px 96px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    button, input, select {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      min-height: 44px; /* 確保手指點擊熱區充足 */
+      transition: transform 0.1s ease, background-color 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-hint {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+    }
+
+    /* ==========================================================================
+       3. 頂部導航與日期控制列
+       ========================================================================== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .brand-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .backup-status {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .backup-status.warning {
+      color: var(--status-amber);
+      font-weight: 600;
+    }
+
+    .icon-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .icon-btn:hover {
+      background-color: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    /* 日期導航列 */
+    .date-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .date-nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .date-nav-btn:hover {
+      background-color: var(--bg-subtle);
+    }
+
+    .date-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .date-display-btn {
+      font-size: 0.96rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .date-display-btn:hover {
+      background-color: var(--bg-subtle);
+    }
+
+    .hidden-date-input {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+    }
+
+    .today-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      min-height: 30px;
+      border-radius: 999px;
+      background-color: var(--accent-blue-soft);
+      color: var(--accent-blue);
+    }
+
+    /* ==========================================================================
+       4. 頂部即時預算儀表板 (剩餘額度制)
+       ========================================================================== */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 380px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .metric-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .metric-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .metric-main {
+      font-size: 1.38rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .metric-main.status-normal { color: var(--text-primary); }
+    .metric-main.status-warn { color: var(--status-amber); }
+    .metric-main.status-danger { color: var(--status-red); }
+    .metric-main.status-success { color: var(--status-green); }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background-color: var(--bg-subtle);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease;
+    }
+
+    .fill-blue { background-color: var(--accent-blue); }
+    .fill-amber { background-color: var(--status-amber); }
+    .fill-red { background-color: var(--status-red); }
+    .fill-green { background-color: var(--status-green); }
+
+    .metric-sub {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ==========================================================================
+       5. 三層速度飲食輸入區
+       ========================================================================== */
+    /* 第二層：份量倍率與快捷餐別選擇器 (Segmented Control) */
+    .quick-controls-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .portion-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background-color: var(--bg-subtle);
+      padding: 4px;
+      border-radius: var(--radius-md);
+    }
+
+    .portion-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      padding-left: 8px;
+      white-space: nowrap;
+    }
+
+    .portion-group {
+      display: flex;
+      flex: 1;
+      gap: 4px;
+    }
+
+    .portion-btn,
+    .quick-meal-btn {
+      flex: 1;
+      min-height: 36px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      padding: 0 4px;
+      white-space: nowrap;
+    }
+
+    .portion-btn.active,
+    .quick-meal-btn.active {
+      background-color: var(--bg-card);
+      color: var(--accent-blue);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 水平滑動分類標籤頁 (Category Tabs) */
+    .category-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+      scrollbar-width: none; /* Firefox 隱藏捲軸 */
+      -ms-overflow-style: none;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+      display: none; /* Chrome / Safari 隱藏捲軸 */
+    }
+
+    .cat-tab {
+      min-height: 36px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-input);
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .cat-tab:hover {
+      border-color: var(--accent-blue);
+      color: var(--text-primary);
+    }
+
+    .cat-tab.active {
+      background-color: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #ffffff;
+    }
+
+    /* 第一層：一鍵快捷網格 */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .preset-btn {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 4px;
+      min-height: 64px;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--accent-blue);
+      background-color: var(--accent-blue-soft);
+    }
+
+    .preset-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .preset-cat-badge {
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 5px;
+      background-color: var(--bg-subtle);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .preset-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .preset-macros {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .preset-macros span.p-highlight {
+      color: var(--accent-blue);
+      font-weight: 700;
+    }
+
+    .manage-toggle-btn {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      min-height: 32px;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-subtle);
+      color: var(--text-secondary);
+    }
+
+    .manage-toggle-btn.active {
+      background-color: var(--accent-blue);
+      color: #ffffff;
+    }
+
+    /* 管理快捷模式清單 */
+    .manage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .manage-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+    }
+
+    .manage-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .manage-item-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .manage-item-sub {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .manage-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mini-icon-btn {
+      width: 36px;
+      height: 36px;
+      min-height: 36px;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-subtle);
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .mini-icon-btn.danger {
+      color: var(--status-red);
+      background-color: var(--status-red-soft);
+    }
+
+    /* 第三層：外食手動快速輸入表單 */
+    .manual-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-group label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .form-control {
+      width: 100%;
+      min-height: 44px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-input);
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .meal-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .meal-chip {
+      min-height: 40px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-input);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .meal-chip.active {
+      border-color: var(--accent-blue);
+      background-color: var(--accent-blue-soft);
+      color: var(--accent-blue);
+    }
+
+    .primary-submit-btn {
+      width: 100%;
+      min-height: 46px;
+      border-radius: var(--radius-md);
+      background-color: var(--accent-blue);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .primary-submit-btn:hover {
+      background-color: var(--accent-blue-hover);
+    }
+
+    /* ==========================================================================
+       6. 當日時間軸明細
+       ========================================================================== */
+    .timeline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      background-color: var(--bg-input);
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--border-color);
+    }
+
+    .log-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+    }
+
+    .log-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .log-top-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meal-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .meal-tag.早餐 { background: var(--meal-breakfast-bg); color: var(--meal-breakfast-fg); }
+    .meal-tag.午餐 { background: var(--meal-lunch-bg); color: var(--meal-lunch-fg); }
+    .meal-tag.晚餐 { background: var(--meal-dinner-bg); color: var(--meal-dinner-fg); }
+    .meal-tag.點心 { background: var(--meal-snack-bg); color: var(--meal-snack-fg); }
+
+    .cat-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background-color: var(--bg-subtle);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .log-time {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .log-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .log-macros {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .log-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .repeat-btn {
+      min-height: 38px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      background-color: var(--accent-blue-soft);
+      color: var(--accent-blue);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .delete-btn {
+      width: 38px;
+      height: 38px;
+      min-height: 38px;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-subtle);
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .delete-btn:hover {
+      background-color: var(--status-red-soft);
+      color: var(--status-red);
+    }
+
+    /* ==========================================================================
+       7. 跨裝置與筆記整合 (資料管理區)
+       ========================================================================== */
+    .data-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 0.86rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .secondary-btn:hover {
+      border-color: var(--accent-blue);
+    }
+
+    .backup-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       8. 彈窗 (Modal) 與 底部復原提示條 (Toast Undo)
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 420px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    /* Toast 浮動提示與復原條 */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 28px);
+      max-width: 460px;
+      z-index: 200;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      animation: slideUp 0.2s ease-out;
+    }
+
+    [data-theme="dark"] .toast {
+      background-color: #334155;
+      border: 1px solid #475569;
+    }
+
+    .toast-undo-btn {
+      min-height: 32px;
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      background-color: var(--accent-blue);
+      color: #ffffff;
+      font-size: 0.82rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 1. 頂部導航與日期控制列 -->
+    <header class="top-bar">
+      <div class="brand-box">
+        <div class="brand-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-blue);">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Pure Nutrition Tracker
+        </div>
+        <div id="backupStatusText" class="backup-status">本機離線儲存就緒</div>
+      </div>
+
+      <div class="icon-actions">
+        <button id="themeToggleBtn" class="icon-btn" title="切換深色／淺色模式" aria-label="切換深色／淺色模式">
+          <!-- 由 JS 動態填入太陽或月亮 SVG -->
+        </button>
+        <button id="openSettingsBtn" class="icon-btn" title="每日目標設定" aria-label="每日目標設定">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 日期切換導航 -->
+    <nav class="date-nav" aria-label="日期導航">
+      <button id="prevDayBtn" class="date-nav-btn" title="前一天" aria-label="前一天">&lt;</button>
+      <div class="date-center">
+        <button id="dateDisplayBtn" class="date-display-btn" title="選擇日期">
+          <span id="dateDisplayText">今日</span>
+        </button>
+        <input type="date" id="datePickerInput" class="hidden-date-input" aria-label="選擇特定日期" />
+        <button id="backToTodayBtn" class="today-pill" style="display: none;">回到今日</button>
+      </div>
+      <button id="nextDayBtn" class="date-nav-btn" title="後一天" aria-label="後一天">&gt;</button>
+    </nav>
+
+    <!-- 2. 頂部即時預算儀表板（剩餘額度制） -->
+    <section class="dashboard-grid" aria-label="今日營養預算儀表板">
+      <!-- 剩餘可用熱量卡片 -->
+      <div class="metric-card">
+        <div class="metric-label">
+          <span>可用熱量預算</span>
+          <span id="kcalPercentBadge">0%</span>
+        </div>
+        <div id="kcalRemainingText" class="metric-main status-normal">剩餘 2000 kcal</div>
+        <div class="progress-track">
+          <div id="kcalProgressBar" class="progress-fill fill-blue"></div>
+        </div>
+        <div class="metric-sub">
+          <span>已攝取 <strong id="kcalConsumedText">0</strong></span>
+          <span>上限 <span id="kcalTargetText">2000</span> kcal</span>
+        </div>
+      </div>
+
+      <!-- 蛋白質目標卡片 -->
+      <div class="metric-card">
+        <div class="metric-label">
+          <span>蛋白質目標進度</span>
+          <span id="proteinPercentBadge">0%</span>
+        </div>
+        <div id="proteinRemainingText" class="metric-main status-normal">還差 110 g</div>
+        <div class="progress-track">
+          <div id="proteinProgressBar" class="progress-fill fill-blue"></div>
+        </div>
+        <div class="metric-sub">
+          <span>已攝取 <strong id="proteinConsumedText">0</strong></span>
+          <span>目標 <span id="proteinTargetText">110</span> g</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 第一層 & 第二層：快捷卡片與彈性份量微調 -->
+    <section class="card" aria-label="一鍵快捷與份量微調">
+      <div class="section-header">
+        <div class="section-title">
+          ⚡ 一鍵快捷紀錄
+          <span class="badge-hint">1秒完成</span>
+        </div>
+        <button id="toggleManagePresetsBtn" class="manage-toggle-btn">管理快捷</button>
+      </div>
+
+      <!-- 第二層：彈性份量微調 & 快捷餐別覆寫 -->
+      <div id="portionControlBar" class="quick-controls-wrap">
+        <div class="portion-bar">
+          <span class="portion-label">份量倍率</span>
+          <div class="portion-group" role="group" aria-label="選擇份量倍率">
+            <button type="button" class="portion-btn" data-mult="0.5">0.5 份</button>
+            <button type="button" class="portion-btn active" data-mult="1">1 份</button>
+            <button type="button" class="portion-btn" data-mult="1.5">1.5 份</button>
+            <button type="button" class="portion-btn" data-mult="2">2 份</button>
+          </div>
+        </div>
+
+        <div class="portion-bar" id="quickMealControlBar">
+          <span class="portion-label">記錄餐別</span>
+          <div class="portion-group" role="group" aria-label="選擇快捷記錄餐別">
+            <button type="button" class="quick-meal-btn active" data-qmeal="自動">自動</button>
+            <button type="button" class="quick-meal-btn" data-qmeal="早餐">早餐</button>
+            <button type="button" class="quick-meal-btn" data-qmeal="午餐">午餐</button>
+            <button type="button" class="quick-meal-btn" data-qmeal="晚餐">晚餐</button>
+            <button type="button" class="quick-meal-btn" data-qmeal="點心">點心</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分類標籤頁 (全部 / 超商 / 星巴克 / 速食 / 自訂) -->
+      <div id="categoryTabs" class="category-tabs" role="tablist" aria-label="食物分類篩選"></div>
+
+      <!-- 快捷按鈕網格（一般模式） -->
+      <div id="presetGrid" class="preset-grid"></div>
+
+      <!-- 快捷管理模式（編輯/新增/刪除/上下排序/合併/重置） -->
+      <div id="presetManageArea" style="display: none;">
+        <div id="managePresetList" class="manage-list"></div>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+          <button id="openAddPresetBtn" class="secondary-btn">
+            ＋ 新增自訂快捷食物
+          </button>
+          <button id="mergeLatestPresetsBtn" class="secondary-btn" style="color: var(--accent-blue); border-color: var(--border-color);">
+            ✨ 合併最新內建菜單（保留自訂項目）
+          </button>
+          <button id="resetDefaultPresetsBtn" class="secondary-btn" style="color: var(--status-amber); border-color: var(--border-color);">
+            ↺ 重置為內建預設菜單庫
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 第三層：外食手動快速輸入 -->
+    <section class="card" aria-label="外食手動快速輸入">
+      <div class="section-header">
+        <div class="section-title">
+          ✍️ 外食手動輸入
+          <span class="badge-hint">5秒完成</span>
+        </div>
+      </div>
+
+      <form id="manualEntryForm" class="manual-form">
+        <div class="input-group">
+          <label for="foodNameInput">餐點名稱（選填，未填自動帶入「外食紀錄」）</label>
+          <input type="text" id="foodNameInput" class="form-control" placeholder="例如：自助餐雞腿便當、牛肉麵..." />
+        </div>
+
+        <div class="form-row-2">
+          <div class="input-group">
+            <label for="foodKcalInput">熱量 (kcal) *</label>
+            <input type="number" id="foodKcalInput" class="form-control" inputmode="numeric" min="0" step="1" placeholder="例如：650" required />
+          </div>
+          <div class="input-group">
+            <label for="foodProteinInput">蛋白質 (g) *</label>
+            <input type="number" id="foodProteinInput" class="form-control" inputmode="decimal" min="0" step="0.1" placeholder="例如：32" required />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>餐別標籤（已依時段自動選取）</label>
+          <div class="meal-selector" id="mealSelectorGroup">
+            <button type="button" class="meal-chip" data-meal="早餐">早餐</button>
+            <button type="button" class="meal-chip" data-meal="午餐">午餐</button>
+            <button type="button" class="meal-chip" data-meal="晚餐">晚餐</button>
+            <button type="button" class="meal-chip" data-meal="點心">點心</button>
+          </div>
+        </div>
+
+        <button type="submit" class="primary-submit-btn">加入紀錄</button>
+      </form>
+    </section>
+
+    <!-- 5. 當日時間軸明細與防呆操作 -->
+    <section class="card" aria-label="當日飲食時間軸明細">
+      <div class="section-header">
+        <div class="section-title">
+          📋 當日飲食明細
+          <span id="logCountBadge" class="badge-hint">0 筆</span>
+        </div>
+      </div>
+
+      <div id="timelineList" class="timeline-list"></div>
+    </section>
+
+    <!-- 6. 跨裝置與筆記整合（資料管理區） -->
+    <section class="card" aria-label="筆記摘要與資料備份">
+      <div class="section-header">
+        <div class="section-title">📦 筆記摘要與資料備份</div>
+      </div>
+
+      <div class="data-actions-grid">
+        <button id="copyMarkdownBtn" class="secondary-btn">
+          📋 一鍵複製 Markdown 摘要（貼入 Obsidian / 筆記）
+        </button>
+
+        <div class="backup-row">
+          <button id="exportJsonBtn" class="secondary-btn">
+            ⬇️ 匯出 JSON 備份
+          </button>
+          <button id="importJsonBtn" class="secondary-btn">
+            ⬆️ 匯入 JSON 還原
+          </button>
+          <input type="file" id="importJsonInput" accept=".json,application/json" style="display: none;" />
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 設定視窗 Modal（每日熱量上限與蛋白質目標） -->
+  <div id="settingsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="settingsModalTitle" class="modal-title">⚙️ 每日營養目標設定</h2>
+        <button type="button" class="mini-icon-btn" id="closeSettingsBtn" aria-label="關閉">✕</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary);">
+        調整後的目標將套用於今日及未來新增紀錄，不會影響過去歷史日期的達標判定。
+      </p>
+      <div class="input-group">
+        <label for="settingKcalInput">每日熱量上限 (kcal)</label>
+        <input type="number" id="settingKcalInput" class="form-control" inputmode="numeric" min="500" max="10000" step="10" />
+      </div>
+      <div class="input-group">
+        <label for="settingProteinInput">每日蛋白質目標 (g)</label>
+        <input type="number" id="settingProteinInput" class="form-control" inputmode="numeric" min="10" max="500" step="1" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelSettingsBtn" class="secondary-btn" style="flex: 1;">取消</button>
+        <button type="button" id="saveSettingsBtn" class="primary-submit-btn" style="flex: 1;">儲存設定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增／編輯快捷食物 Modal -->
+  <div id="presetModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="presetModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="presetModalTitle" class="modal-title">新增快捷食物</h2>
+        <button type="button" class="mini-icon-btn" id="closePresetModalBtn" aria-label="關閉">✕</button>
+      </div>
+      <input type="hidden" id="editPresetIdInput" />
+      <div class="input-group">
+        <label for="presetCategorySelect">所屬分類 *</label>
+        <select id="presetCategorySelect" class="form-control">
+          <option value="超商">超商</option>
+          <option value="星巴克">星巴克</option>
+          <option value="速食">速食</option>
+          <option value="__custom__">＋ 自訂新分類...</option>
+        </select>
+      </div>
+      <div id="customCategoryGroup" class="input-group" style="display: none;">
+        <label for="presetCustomCategoryInput">輸入新分類名稱 *</label>
+        <input type="text" id="presetCustomCategoryInput" class="form-control" placeholder="例如：手搖飲、早餐店、健身餐..." />
+      </div>
+      <div class="input-group">
+        <label for="presetNameInput">食物名稱 *</label>
+        <input type="text" id="presetNameInput" class="form-control" placeholder="例如：乳清蛋白 1匙" />
+      </div>
+      <div class="form-row-2">
+        <div class="input-group">
+          <label for="presetKcalInput">熱量 (kcal) *</label>
+          <input type="number" id="presetKcalInput" class="form-control" inputmode="numeric" min="0" step="1" placeholder="120" />
+        </div>
+        <div class="input-group">
+          <label for="presetProteinInput">蛋白質 (g) *</label>
+          <input type="number" id="presetProteinInput" class="form-control" inputmode="decimal" min="0" step="0.1" placeholder="24" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelPresetModalBtn" class="secondary-btn" style="flex: 1;">取消</button>
+        <button type="button" id="savePresetBtn" class="primary-submit-btn" style="flex: 1;">儲存快捷</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 重置預設菜單確認 Modal (不使用系統 confirm) -->
+  <div id="resetConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="resetConfirmTitle" class="modal-title">↺ 重置為內建預設菜單庫</h2>
+        <button type="button" class="mini-icon-btn" id="closeResetModalBtn" aria-label="關閉">✕</button>
+      </div>
+      <p style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.55;">
+        確定要將快捷菜單還原為系統內建的 17 項分類菜單（超商、星巴克、速食）嗎？<br>
+        <span style="color: var(--status-amber); font-weight: 600;">注意：您自行新增或修改的快捷按鈕將會被覆蓋，但每日飲食紀錄不會受到影響。</span>
+      </p>
+      <div class="modal-footer">
+        <button type="button" id="cancelResetBtn" class="secondary-btn" style="flex: 1;">取消</button>
+        <button type="button" id="confirmResetBtn" class="primary-submit-btn" style="flex: 1; background-color: var(--status-amber); color: #0f172a;">確認重置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部 Toast 與刪除復原條容器 -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script>
+    /**
+     * Pure Nutrition Tracker (v4) — 核心狀態與應用程式邏輯
+     * 儲存鍵名規範：
+     * - pnt_settings : { targetKcal, targetProtein, theme, lastBackupAt }
+     * - pnt_presets  : Array<{ id, category, name, kcal, protein }>
+     * - pnt_preset_schema_version : 'v4'
+     * - pnt_seen_builtin_ids : Array<string> (追蹤已匯入過的內建品項 ID，避免刪除後重複跳出)
+     * - pnt_logs_YYYY-MM-DD : { targetKcal, targetProtein, items: Array<{ id, name, category, kcal, protein, meal, time }> }
+     */
+    (function () {
+      'use strict';
+
+      // ========================================================================
+      // 1. 常數與預設分類菜單庫定義 (v4 精簡無牛版：僅保留超商、星巴克、速食共 17 項)
+      // ========================================================================
+      const STORAGE_KEYS = {
+        SETTINGS: 'pnt_settings',
+        PRESETS: 'pnt_presets',
+        PRESET_SCHEMA_VERSION: 'pnt_preset_schema_version',
+        SEEN_BUILTIN_IDS: 'pnt_seen_builtin_ids',
+        LOG_PREFIX: 'pnt_logs_'
+      };
+
+      const CURRENT_PRESET_SCHEMA_VERSION = 'v4';
+      const BASE_CATEGORIES = ['超商', '星巴克', '速食'];
+
+      // v4 升級時需自動清理的舊版通用餐廳與含牛預設品項
+      const REMOVED_LEGACY_PRESET_IDS = new Set(['rt1', 'rt2', 'rt3', 'rt4', 'rt5', 'rt6']);
+      const REMOVED_LEGACY_PRESET_NAMES = new Set([
+        '滷雞腿便當 去皮飯半碗',
+        '排骨便當 飯半碗',
+        '健康水煮餐盒 雞胸',
+        '牛肉麵 清燉/紅燒',
+        '親子丼 / 雞肉丼飯',
+        '涮涮鍋 梅花豬+菜盤無加工料'
+      ]);
+
+      const DEFAULT_SETTINGS = {
+        targetKcal: 2000,
+        targetProtein: 110,
+        theme: 'light',
+        lastBackupAt: null
+      };
+
+      const DEFAULT_PRESETS = [
+        // 超商 (6項)
+        { id: 'cs1', category: '超商', name: '超商健身餐盒', kcal: 520, protein: 28 },
+        { id: 'cs2', category: '超商', name: '無糖高纖豆漿 (400ml)', kcal: 165, protein: 14 },
+        { id: 'cs3', category: '超商', name: '無糖拿鐵 (大杯)', kcal: 150, protein: 8 },
+        { id: 'cs4', category: '超商', name: '希臘優格 (無糖)', kcal: 110, protein: 10 },
+        { id: 'cs5', category: '超商', name: '茶葉蛋 / 水煮蛋 (1顆)', kcal: 75, protein: 7 },
+        { id: 'cs6', category: '超商', name: '超商即食雞胸肉', kcal: 120, protein: 23 },
+
+        // 星巴克 (3項)
+        { id: 'sb1', category: '星巴克', name: '星巴克 總匯三明治', kcal: 513, protein: 27.9 },
+        { id: 'sb2', category: '星巴克', name: '星巴克 烤雞生吐司三明治', kcal: 342, protein: 21 },
+        { id: 'sb3', category: '星巴克', name: '星巴克 大杯熱拿鐵', kcal: 295, protein: 10 },
+
+        // 速食 (8項，無牛)
+        { id: 'ff8', category: '速食', name: '麥當勞 四塊麥克雞塊', kcal: 174, protein: 10 },
+        { id: 'ff1', category: '速食', name: '麥當勞 嫩煎鷄腿堡', kcal: 363, protein: 26 },
+        { id: 'ff2', category: '速食', name: '麥當勞 麥香鷄', kcal: 352, protein: 14 },
+        { id: 'ff3', category: '速食', name: '麥當勞 勁辣鷄腿堡', kcal: 493, protein: 22 },
+        { id: 'ff4', category: '速食', name: '麥當勞 麥克鷄塊 6塊', kcal: 270, protein: 15 },
+        { id: 'ff5', category: '速食', name: '肯德基 紙包雞', kcal: 354, protein: 34 },
+        { id: 'ff6', category: '速食', name: '肯德基 咔啦脆雞 1塊', kcal: 285, protein: 21 },
+        { id: 'ff7', category: '速食', name: '肯德基 原味蛋撻 1顆', kcal: 182, protein: 3.5 }
+      ];
+
+      // ========================================================================
+      // 2. 應用程式狀態 (State)
+      // ========================================================================
+      let settings = loadSettings();
+      let presets = loadPresets();
+      let currentDateStr = getTodayDateStr();
+      let selectedCategory = '全部';
+      let selectedMultiplier = 1;
+      let selectedQuickMeal = '自動'; // '自動' | '早餐' | '午餐' | '晚餐' | '點心'
+      let selectedManualMeal = detectCurrentMealByTime();
+      let isManagePresetsMode = false;
+      let undoBuffer = null; // 暫存最近一次刪除的紀錄供 Toast Undo 復原
+
+      // ========================================================================
+      // 3. 日期與時間工具函式
+      // ========================================================================
+      function getTodayDateStr() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      function shiftDateStr(dateStr, deltaDays) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
+        dt.setDate(dt.getDate() + deltaDays);
+        const ny = dt.getFullYear();
+        const nm = String(dt.getMonth() + 1).padStart(2, '0');
+        const nd = String(dt.getDate()).padStart(2, '0');
+        return `${ny}-${nm}-${nd}`;
+      }
+
+      function formatDisplayDate(dateStr) {
+        const today = getTodayDateStr();
+        const yesterday = shiftDateStr(today, -1);
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
+        const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+        const w = weekdays[dt.getDay()];
+        const base = `${m}/${d} (${w})`;
+
+        if (dateStr === today) return `今日 · ${base}`;
+        if (dateStr === yesterday) return `昨日 · ${base}`;
+        return `${y}/${base}`;
+      }
+
+      function getCurrentTimeHHMM() {
+        const now = new Date();
+        return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      }
+
+      // 依據系統當下時間自動判斷餐別
+      function detectCurrentMealByTime() {
+        const now = new Date();
+        const mins = now.getHours() * 60 + now.getMinutes();
+        if (mins >= 300 && mins <= 630) return '早餐';   // 05:00 - 10:30
+        if (mins >= 631 && mins <= 870) return '午餐';   // 10:31 - 14:30
+        if (mins >= 871 && mins <= 1050) return '點心';  // 14:31 - 17:30
+        if (mins >= 1051 && mins <= 1290) return '晚餐'; // 17:31 - 21:30
+        return '點心';
+      }
+
+      function roundNum(val) {
+        return Math.round(val * 10) / 10;
+      }
+
+      // ========================================================================
+      // 4. LocalStorage 讀寫與資料快照管理
+      // ========================================================================
+      function loadSettings() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+          if (!raw) return { ...DEFAULT_SETTINGS };
+          return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+        } catch (e) {
+          console.error('讀取設定失敗', e);
+          return { ...DEFAULT_SETTINGS };
+        }
+      }
+
+      function saveSettings() {
+        try {
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+        } catch (e) {
+          showToast('儲存設定失敗，請檢查瀏覽器儲存空間');
+        }
+      }
+
+      function loadPresets() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.PRESETS);
+          const storedSchemaVersion = localStorage.getItem(STORAGE_KEYS.PRESET_SCHEMA_VERSION);
+          const seenRaw = localStorage.getItem(STORAGE_KEYS.SEEN_BUILTIN_IDS);
+          let seenIds = new Set();
+          if (seenRaw) {
+            try {
+              const arr = JSON.parse(seenRaw);
+              if (Array.isArray(arr)) seenIds = new Set(arr);
+            } catch (e) { /* 忽略損毀紀錄 */ }
+          }
+
+          if (!raw) {
+            const initial = DEFAULT_PRESETS.map(p => ({ ...p }));
+            const allIds = DEFAULT_PRESETS.map(p => p.id);
+            localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(initial));
+            localStorage.setItem(STORAGE_KEYS.SEEN_BUILTIN_IDS, JSON.stringify(allIds));
+            localStorage.setItem(STORAGE_KEYS.PRESET_SCHEMA_VERSION, CURRENT_PRESET_SCHEMA_VERSION);
+            return initial;
+          }
+
+          let parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) {
+            return DEFAULT_PRESETS.map(p => ({ ...p }));
+          }
+
+          // 向下相容：為舊版無 category 欄位的項目補上預設分類「超商」
+          parsed = parsed.map(item => ({
+            ...item,
+            category: (item.category && String(item.category).trim()) ? String(item.category).trim() : '超商'
+          }));
+
+          // 從舊版 (v1/v2/v3) 升級至 v4 時，自動清除「常見餐廳」通用項目與任何含「牛」品項，同時保留使用者自訂項目
+          let migrated = false;
+          if (storedSchemaVersion !== CURRENT_PRESET_SCHEMA_VERSION) {
+            const beforeLen = parsed.length;
+            parsed = parsed.filter(item => {
+              const itemName = String(item.name || '');
+              const isLegacyRestaurant = REMOVED_LEGACY_PRESET_IDS.has(item.id) || REMOVED_LEGACY_PRESET_NAMES.has(itemName);
+              const containsBeef = itemName.includes('牛');
+              return !isLegacyRestaurant && !containsBeef;
+            });
+            if (parsed.length !== beforeLen) {
+              migrated = true;
+            }
+          }
+
+          // 同步最新內建菜單名稱與數值（若使用者未自行修改過且 ID 相同）
+          const defaultMap = new Map(DEFAULT_PRESETS.map(d => [d.id, d]));
+          parsed = parsed.map(item => {
+            if (defaultMap.has(item.id) && storedSchemaVersion !== CURRENT_PRESET_SCHEMA_VERSION) {
+              return { ...defaultMap.get(item.id) };
+            }
+            return item;
+          });
+
+          // 首次升級追蹤機制時，先標記既有清單中已存在的品項為已見過
+          if (!seenRaw) {
+            parsed.forEach(p => {
+              if (p.id) seenIds.add(p.id);
+            });
+          }
+
+          // 自動合併「從未匯入過的新版內建菜單」(保留使用者已刪除的舊內建品項不強迫還原)
+          const existingIds = new Set(parsed.map(p => p.id));
+          const existingNames = new Set(parsed.map(p => p.name));
+          let addedCount = 0;
+
+          DEFAULT_PRESETS.forEach(defItem => {
+            if (!seenIds.has(defItem.id)) {
+              if (!existingIds.has(defItem.id) && !existingNames.has(defItem.name)) {
+                parsed.push({ ...defItem });
+                addedCount++;
+              }
+              seenIds.add(defItem.id);
+            }
+          });
+
+          localStorage.setItem(STORAGE_KEYS.SEEN_BUILTIN_IDS, JSON.stringify(Array.from(seenIds)));
+          localStorage.setItem(STORAGE_KEYS.PRESET_SCHEMA_VERSION, CURRENT_PRESET_SCHEMA_VERSION);
+          if (migrated || addedCount > 0 || !seenRaw || storedSchemaVersion !== CURRENT_PRESET_SCHEMA_VERSION) {
+            localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(parsed));
+          }
+
+          return parsed;
+        } catch (e) {
+          return DEFAULT_PRESETS.map(p => ({ ...p }));
+        }
+      }
+
+      function savePresets() {
+        try {
+          localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(presets));
+        } catch (e) {
+          showToast('儲存快捷清單失敗');
+        }
+      }
+
+      // 取得特定日期的紀錄物件（若尚無紀錄則回傳帶有目前設定目標的空結構）
+      function getDayLog(dateStr) {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.LOG_PREFIX + dateStr);
+          if (!raw) {
+            return {
+              targetKcal: settings.targetKcal,
+              targetProtein: settings.targetProtein,
+              items: []
+            };
+          }
+          const parsed = JSON.parse(raw);
+          return {
+            targetKcal: Number(parsed.targetKcal) || settings.targetKcal,
+            targetProtein: Number(parsed.targetProtein) || settings.targetProtein,
+            items: Array.isArray(parsed.items) ? parsed.items : []
+          };
+        } catch (e) {
+          return {
+            targetKcal: settings.targetKcal,
+            targetProtein: settings.targetProtein,
+            items: []
+          };
+        }
+      }
+
+      function saveDayLog(dateStr, logObj) {
+        try {
+          localStorage.setItem(STORAGE_KEYS.LOG_PREFIX + dateStr, JSON.stringify(logObj));
+        } catch (e) {
+          showToast('儲存紀錄失敗，請確認儲存空間');
+        }
+      }
+
+      // ========================================================================
+      // 5. 核心業務操作 (新增、重複、刪除、復原)
+      // ========================================================================
+      function addFoodEntry({ name, category, kcal, protein, meal }) {
+        const log = getDayLog(currentDateStr);
+        // 若該日尚無任何紀錄，寫入第一筆時鎖定當下的目標快照
+        if (log.items.length === 0) {
+          log.targetKcal = settings.targetKcal;
+          log.targetProtein = settings.targetProtein;
+        }
+
+        const newItem = {
+          id: 'item_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          name: name.trim() || '外食紀錄',
+          category: category || '',
+          kcal: roundNum(Number(kcal) || 0),
+          protein: roundNum(Number(protein) || 0),
+          meal: meal || detectCurrentMealByTime(),
+          time: getCurrentTimeHHMM()
+        };
+
+        log.items.unshift(newItem); // 最新紀錄置頂顯示
+        saveDayLog(currentDateStr, log);
+        renderAll();
+        return newItem;
+      }
+
+      function handleQuickAdd(preset) {
+        const mult = selectedMultiplier;
+        const actualKcal = roundNum(preset.kcal * mult);
+        const actualProtein = roundNum(preset.protein * mult);
+        const displayName = mult === 1 ? preset.name : `${preset.name} (×${mult})`;
+        const targetMeal = selectedQuickMeal === '自動' ? detectCurrentMealByTime() : selectedQuickMeal;
+
+        addFoodEntry({
+          name: displayName,
+          category: preset.category || '超商',
+          kcal: actualKcal,
+          protein: actualProtein,
+          meal: targetMeal
+        });
+
+        // 點擊後自動歸位回 1 份與「自動」餐別，維持流暢單手體驗
+        let needControlRerender = false;
+        if (selectedMultiplier !== 1) {
+          selectedMultiplier = 1;
+          needControlRerender = true;
+        }
+        if (selectedQuickMeal !== '自動') {
+          selectedQuickMeal = '自動';
+          needControlRerender = true;
+        }
+        if (needControlRerender) {
+          renderPortionBar();
+          renderPresets();
+        }
+
+        showToast(`已加入[${targetMeal}]：${displayName} (+${actualKcal} kcal / +${actualProtein}g)`);
+      }
+
+      function repeatLogItem(itemId) {
+        const log = getDayLog(currentDateStr);
+        const target = log.items.find(i => i.id === itemId);
+        if (!target) return;
+
+        addFoodEntry({
+          name: target.name,
+          category: target.category || '',
+          kcal: target.kcal,
+          protein: target.protein,
+          meal: target.meal
+        });
+        showToast(`已重複紀錄：${target.name}`);
+      }
+
+      function deleteLogItem(itemId) {
+        const log = getDayLog(currentDateStr);
+        const idx = log.items.findIndex(i => i.id === itemId);
+        if (idx === -1) return;
+
+        const [removed] = log.items.splice(idx, 1);
+        saveDayLog(currentDateStr, log);
+        renderAll();
+
+        undoBuffer = {
+          dateStr: currentDateStr,
+          item: removed,
+          index: idx
+        };
+
+        showToast(`已刪除「${removed.name}」`, true);
+      }
+
+      function undoLastDelete() {
+        if (!undoBuffer) return;
+        const { dateStr, item, index } = undoBuffer;
+        const log = getDayLog(dateStr);
+        const insertIdx = Math.min(index, log.items.length);
+        log.items.splice(insertIdx, 0, item);
+        saveDayLog(dateStr, log);
+        undoBuffer = null;
+
+        if (currentDateStr !== dateStr) {
+          currentDateStr = dateStr;
+        }
+        renderAll();
+        showToast(`已復原「${item.name}」`);
+      }
+
+      // ========================================================================
+      // 6. 介面渲染函式 (UI Rendering)
+      // ========================================================================
+      function applyTheme() {
+        const isDark = settings.theme === 'dark';
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        const btn = document.getElementById('themeToggleBtn');
+        btn.innerHTML = isDark
+          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
+          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+      }
+
+      function renderBackupStatus() {
+        const el = document.getElementById('backupStatusText');
+        if (!settings.lastBackupAt) {
+          el.textContent = '尚未建立 JSON 備份 · 建議定期匯出';
+          el.className = 'backup-status warning';
+          return;
+        }
+        const diffMs = Date.now() - settings.lastBackupAt;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays >= 7) {
+          el.textContent = `⚠️ 距離上次備份已過 ${diffDays} 天`;
+          el.className = 'backup-status warning';
+        } else if (diffDays === 0) {
+          el.textContent = '✓ 今日已完成資料備份';
+          el.className = 'backup-status';
+        } else {
+          el.textContent = `上次備份：${diffDays} 天前`;
+          el.className = 'backup-status';
+        }
+      }
+
+      function renderDateNav() {
+        document.getElementById('dateDisplayText').textContent = formatDisplayDate(currentDateStr);
+        document.getElementById('datePickerInput').value = currentDateStr;
+        const isToday = currentDateStr === getTodayDateStr();
+        document.getElementById('backToTodayBtn').style.display = isToday ? 'none' : 'inline-flex';
+      }
+
+      function renderDashboard() {
+        const log = getDayLog(currentDateStr);
+        // 若當日尚無紀錄，即時顯示最新設定目標；若有紀錄則使用當日目標快照
+        const targetKcal = log.items.length > 0 ? log.targetKcal : settings.targetKcal;
+        const targetProtein = log.items.length > 0 ? log.targetProtein : settings.targetProtein;
+
+        const consumedKcal = roundNum(log.items.reduce((sum, item) => sum + (Number(item.kcal) || 0), 0));
+        const consumedProtein = roundNum(log.items.reduce((sum, item) => sum + (Number(item.protein) || 0), 0));
+
+        // 1. 熱量卡片計算與視覺狀態
+        const remKcal = roundNum(targetKcal - consumedKcal);
+        const kcalRatio = targetKcal > 0 ? (consumedKcal / targetKcal) : 0;
+        const kcalPct = Math.round(kcalRatio * 100);
+
+        const kcalMainEl = document.getElementById('kcalRemainingText');
+        const kcalBarEl = document.getElementById('kcalProgressBar');
+
+        if (remKcal >= 0) {
+          kcalMainEl.textContent = `剩餘 ${remKcal} kcal`;
+        } else {
+          kcalMainEl.textContent = `超出 ${Math.abs(remKcal)} kcal`;
+        }
+
+        kcalMainEl.className = 'metric-main';
+        kcalBarEl.className = 'progress-fill';
+
+        if (kcalRatio > 1) {
+          kcalMainEl.classList.add('status-danger');
+          kcalBarEl.classList.add('fill-red');
+        } else if (kcalRatio >= 0.85) {
+          kcalMainEl.classList.add('status-warn');
+          kcalBarEl.classList.add('fill-amber');
+        } else {
+          kcalMainEl.classList.add('status-normal');
+          kcalBarEl.classList.add('fill-blue');
+        }
+
+        kcalBarEl.style.width = `${Math.min(100, kcalPct)}%`;
+        document.getElementById('kcalPercentBadge').textContent = `${kcalPct}%`;
+        document.getElementById('kcalConsumedText').textContent = consumedKcal;
+        document.getElementById('kcalTargetText').textContent = targetKcal;
+
+        // 2. 蛋白質卡片計算與視覺狀態
+        const remProtein = roundNum(targetProtein - consumedProtein);
+        const proteinRatio = targetProtein > 0 ? (consumedProtein / targetProtein) : 0;
+        const proteinPct = Math.round(proteinRatio * 100);
+
+        const proteinMainEl = document.getElementById('proteinRemainingText');
+        const proteinBarEl = document.getElementById('proteinProgressBar');
+
+        proteinMainEl.className = 'metric-main';
+        proteinBarEl.className = 'progress-fill';
+
+        if (remProtein <= 0) {
+          const extra = Math.abs(remProtein);
+          proteinMainEl.textContent = extra > 0 ? `已達標 (+${extra} g)` : '已達標！';
+          proteinMainEl.classList.add('status-success');
+          proteinBarEl.classList.add('fill-green');
+        } else {
+          proteinMainEl.textContent = `還差 ${remProtein} g`;
+          proteinMainEl.classList.add('status-normal');
+          proteinBarEl.classList.add('fill-blue');
+        }
+
+        proteinBarEl.style.width = `${Math.min(100, proteinPct)}%`;
+        document.getElementById('proteinPercentBadge').textContent = `${proteinPct}%`;
+        document.getElementById('proteinConsumedText').textContent = consumedProtein;
+        document.getElementById('proteinTargetText').textContent = targetProtein;
+      }
+
+      function renderPortionBar() {
+        const multBtns = document.querySelectorAll('#portionControlBar .portion-btn');
+        multBtns.forEach(btn => {
+          const mult = Number(btn.getAttribute('data-mult'));
+          btn.classList.toggle('active', mult === selectedMultiplier);
+        });
+
+        const mealBtns = document.querySelectorAll('#quickMealControlBar .quick-meal-btn');
+        mealBtns.forEach(btn => {
+          const qmeal = btn.getAttribute('data-qmeal');
+          btn.classList.toggle('active', qmeal === selectedQuickMeal);
+        });
+      }
+
+      function getAvailableCategories() {
+        const set = new Set(['全部', ...BASE_CATEGORIES]);
+        presets.forEach(p => {
+          if (p.category) set.add(p.category);
+        });
+        return Array.from(set);
+      }
+
+      function renderCategoryTabs() {
+        const tabsEl = document.getElementById('categoryTabs');
+        const categories = getAvailableCategories();
+
+        // 若目前選取的自訂分類已被全數刪除，自動切回「全部」
+        if (!categories.includes(selectedCategory)) {
+          selectedCategory = '全部';
+        }
+
+        tabsEl.innerHTML = '';
+        categories.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'cat-tab' + (cat === selectedCategory ? ' active' : '');
+          btn.setAttribute('role', 'tab');
+          btn.setAttribute('aria-selected', cat === selectedCategory ? 'true' : 'false');
+          btn.textContent = cat;
+          btn.addEventListener('click', () => {
+            selectedCategory = cat;
+            renderCategoryTabs();
+            renderPresets();
+          });
+          tabsEl.appendChild(btn);
+        });
+      }
+
+      function renderPresets() {
+        const gridEl = document.getElementById('presetGrid');
+        const manageAreaEl = document.getElementById('presetManageArea');
+        const portionBarEl = document.getElementById('portionControlBar');
+        const categoryTabsEl = document.getElementById('categoryTabs');
+        const toggleBtn = document.getElementById('toggleManagePresetsBtn');
+
+        toggleBtn.classList.toggle('active', isManagePresetsMode);
+        toggleBtn.textContent = isManagePresetsMode ? '完成管理' : '管理快捷';
+
+        if (!isManagePresetsMode) {
+          gridEl.style.display = 'grid';
+          portionBarEl.style.display = 'flex';
+          categoryTabsEl.style.display = 'flex';
+          manageAreaEl.style.display = 'none';
+
+          renderCategoryTabs();
+
+          const filtered = selectedCategory === '全部'
+            ? presets
+            : presets.filter(p => (p.category || '超商') === selectedCategory);
+
+          gridEl.innerHTML = '';
+          if (filtered.length === 0) {
+            gridEl.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1; padding: 18px;">此分類目前尚無快捷品項，可點擊右上角「管理快捷」新增。</div>`;
+            return;
+          }
+
+          filtered.forEach(p => {
+            const calcKcal = roundNum(p.kcal * selectedMultiplier);
+            const calcProtein = roundNum(p.protein * selectedMultiplier);
+            const showCatBadge = selectedCategory === '全部' && p.category;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'preset-btn';
+            btn.innerHTML = `
+              <div class="preset-top">
+                <div class="preset-name">${escapeHtml(p.name)}</div>
+                ${showCatBadge ? `<span class="preset-cat-badge">${escapeHtml(p.category)}</span>` : ''}
+              </div>
+              <div class="preset-macros">${calcKcal} kcal · <span class="p-highlight">${calcProtein}g 蛋白</span></div>
+            `;
+            btn.addEventListener('click', () => handleQuickAdd(p));
+            gridEl.appendChild(btn);
+          });
+        } else {
+          gridEl.style.display = 'none';
+          portionBarEl.style.display = 'none';
+          categoryTabsEl.style.display = 'none';
+          manageAreaEl.style.display = 'block';
+
+          const listEl = document.getElementById('managePresetList');
+          listEl.innerHTML = '';
+
+          presets.forEach((p, idx) => {
+            const row = document.createElement('div');
+            row.className = 'manage-item';
+            row.innerHTML = `
+              <div class="manage-item-info">
+                <div class="manage-item-title">
+                  <span class="preset-cat-badge" style="margin-right: 4px;">${escapeHtml(p.category || '超商')}</span>
+                  ${escapeHtml(p.name)}
+                </div>
+                <div class="manage-item-sub">${p.kcal} kcal · ${p.protein}g 蛋白質</div>
+              </div>
+              <div class="manage-item-actions">
+                <button type="button" class="mini-icon-btn" data-action="up" title="上移" ${idx === 0 ? 'disabled style="opacity:0.35"' : ''}>↑</button>
+                <button type="button" class="mini-icon-btn" data-action="down" title="下移" ${idx === presets.length - 1 ? 'disabled style="opacity:0.35"' : ''}>↓</button>
+                <button type="button" class="mini-icon-btn" data-action="edit" title="編輯">✎</button>
+                <button type="button" class="mini-icon-btn danger" data-action="delete" title="刪除">✕</button>
+              </div>
+            `;
+
+            row.querySelector('[data-action="up"]').addEventListener('click', () => movePreset(idx, -1));
+            row.querySelector('[data-action="down"]').addEventListener('click', () => movePreset(idx, 1));
+            row.querySelector('[data-action="edit"]').addEventListener('click', () => openPresetModal(p));
+            row.querySelector('[data-action="delete"]').addEventListener('click', () => deletePreset(p.id));
+
+            listEl.appendChild(row);
+          });
+        }
+      }
+
+      function renderMealSelector() {
+        const chips = document.querySelectorAll('#mealSelectorGroup .meal-chip');
+        chips.forEach(chip => {
+          chip.classList.toggle('active', chip.getAttribute('data-meal') === selectedManualMeal);
+        });
+      }
+
+      function renderTimeline() {
+        const log = getDayLog(currentDateStr);
+        const listEl = document.getElementById('timelineList');
+        document.getElementById('logCountBadge').textContent = `${log.items.length} 筆`;
+
+        if (log.items.length === 0) {
+          listEl.innerHTML = `<div class="empty-state">尚無飲食紀錄，點擊上方快捷按鈕或手動輸入開始追蹤！</div>`;
+          return;
+        }
+
+        listEl.innerHTML = '';
+        log.items.forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'log-item';
+          const catBadgeHtml = item.category
+            ? `<span class="cat-tag">${escapeHtml(item.category)}</span>`
+            : '';
+          row.innerHTML = `
+            <div class="log-main">
+              <div class="log-top-row">
+                <span class="meal-tag ${escapeHtml(item.meal)}">${escapeHtml(item.meal)}</span>
+                ${catBadgeHtml}
+                <span class="log-time">${escapeHtml(item.time)}</span>
+              </div>
+              <div class="log-name">${escapeHtml(item.name)}</div>
+              <div class="log-macros">${item.kcal} kcal · ${item.protein}g 蛋白質</div>
+            </div>
+            <div class="log-actions">
+              <button type="button" class="repeat-btn" title="再吃一次 (+1)">+1</button>
+              <button type="button" class="delete-btn" title="刪除此筆紀錄" aria-label="刪除此筆紀錄">×</button>
+            </div>
+          `;
+
+          row.querySelector('.repeat-btn').addEventListener('click', () => repeatLogItem(item.id));
+          row.querySelector('.delete-btn').addEventListener('click', () => deleteLogItem(item.id));
+          listEl.appendChild(row);
+        });
+      }
+
+      function renderAll() {
+        applyTheme();
+        renderBackupStatus();
+        renderDateNav();
+        renderDashboard();
+        renderPortionBar();
+        renderPresets();
+        renderMealSelector();
+        renderTimeline();
+      }
+
+      // ========================================================================
+      // 7. 快捷食物管理邏輯 (新增 / 編輯 / 排序 / 刪除)
+      // ========================================================================
+      function movePreset(index, direction) {
+        const targetIdx = index + direction;
+        if (targetIdx < 0 || targetIdx >= presets.length) return;
+        const temp = presets[index];
+        presets[index] = presets[targetIdx];
+        presets[targetIdx] = temp;
+        savePresets();
+        renderPresets();
+      }
+
+      function deletePreset(id) {
+        presets = presets.filter(p => p.id !== id);
+        savePresets();
+        renderPresets();
+        showToast('已刪除快捷食物');
+      }
+
+      function populateCategoryDropdown(currentCat) {
+        const selectEl = document.getElementById('presetCategorySelect');
+        const customGroup = document.getElementById('customCategoryGroup');
+        const customInput = document.getElementById('presetCustomCategoryInput');
+
+        const allCats = new Set(BASE_CATEGORIES);
+        presets.forEach(p => {
+          if (p.category) allCats.add(p.category);
+        });
+
+        selectEl.innerHTML = '';
+        allCats.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat;
+          selectEl.appendChild(opt);
+        });
+
+        const customOpt = document.createElement('option');
+        customOpt.value = '__custom__';
+        customOpt.textContent = '＋ 自訂新分類...';
+        selectEl.appendChild(customOpt);
+
+        if (currentCat && allCats.has(currentCat)) {
+          selectEl.value = currentCat;
+          customGroup.style.display = 'none';
+          customInput.value = '';
+        } else if (currentCat) {
+          selectEl.value = '__custom__';
+          customGroup.style.display = 'flex';
+          customInput.value = currentCat;
+        } else {
+          selectEl.value = '超商';
+          customGroup.style.display = 'none';
+          customInput.value = '';
+        }
+      }
+
+      function openPresetModal(preset = null) {
+        const modal = document.getElementById('presetModal');
+        const titleEl = document.getElementById('presetModalTitle');
+        const idInput = document.getElementById('editPresetIdInput');
+        const nameInput = document.getElementById('presetNameInput');
+        const kcalInput = document.getElementById('presetKcalInput');
+        const proteinInput = document.getElementById('presetProteinInput');
+
+        if (preset) {
+          titleEl.textContent = '編輯快捷食物';
+          idInput.value = preset.id;
+          populateCategoryDropdown(preset.category || '超商');
+          nameInput.value = preset.name;
+          kcalInput.value = preset.kcal;
+          proteinInput.value = preset.protein;
+        } else {
+          titleEl.textContent = '新增快捷食物';
+          idInput.value = '';
+          const defaultCat = selectedCategory !== '全部' ? selectedCategory : '超商';
+          populateCategoryDropdown(defaultCat);
+          nameInput.value = '';
+          kcalInput.value = '';
+          proteinInput.value = '';
+        }
+
+        modal.classList.add('open');
+        nameInput.focus();
+      }
+
+      function closePresetModal() {
+        document.getElementById('presetModal').classList.remove('open');
+      }
+
+      function handleSavePreset() {
+        const id = document.getElementById('editPresetIdInput').value;
+        const selectVal = document.getElementById('presetCategorySelect').value;
+        const customCatVal = document.getElementById('presetCustomCategoryInput').value.trim();
+        const name = document.getElementById('presetNameInput').value.trim();
+        const kcal = roundNum(Number(document.getElementById('presetKcalInput').value));
+        const protein = roundNum(Number(document.getElementById('presetProteinInput').value));
+
+        const category = selectVal === '__custom__' ? customCatVal : selectVal;
+
+        if (!category) {
+          showToast('請選擇或輸入分類名稱');
+          return;
+        }
+        if (!name) {
+          showToast('請輸入食物名稱');
+          return;
+        }
+        if (isNaN(kcal) || kcal < 0 || isNaN(protein) || protein < 0) {
+          showToast('請輸入有效的熱量與蛋白質數值');
+          return;
+        }
+
+        if (id) {
+          const idx = presets.findIndex(p => p.id === id);
+          if (idx !== -1) {
+            presets[idx] = { id, category, name, kcal, protein };
+          }
+          showToast('已更新快捷食物');
+        } else {
+          presets.push({
+            id: 'preset_' + Date.now(),
+            category,
+            name,
+            kcal,
+            protein
+          });
+          showToast('已新增快捷食物');
+        }
+
+        savePresets();
+        closePresetModal();
+        renderPresets();
+      }
+
+      function resetToDefaultPresets() {
+        presets = DEFAULT_PRESETS.map(p => ({ ...p }));
+        savePresets();
+        localStorage.setItem(
+          STORAGE_KEYS.SEEN_BUILTIN_IDS,
+          JSON.stringify(DEFAULT_PRESETS.map(p => p.id))
+        );
+        localStorage.setItem(STORAGE_KEYS.PRESET_SCHEMA_VERSION, CURRENT_PRESET_SCHEMA_VERSION);
+        selectedCategory = '全部';
+        document.getElementById('resetConfirmModal').classList.remove('open');
+        renderPresets();
+        showToast(`已重置為內建 ${DEFAULT_PRESETS.length} 項預設分類菜單`);
+      }
+
+      function mergeLatestBuiltinPresets() {
+        const existingIds = new Set(presets.map(p => p.id));
+        const existingNames = new Set(presets.map(p => p.name));
+        let addedCount = 0;
+
+        DEFAULT_PRESETS.forEach(defItem => {
+          if (!existingIds.has(defItem.id) && !existingNames.has(defItem.name)) {
+            presets.push({ ...defItem });
+            addedCount++;
+          }
+        });
+
+        localStorage.setItem(
+          STORAGE_KEYS.SEEN_BUILTIN_IDS,
+          JSON.stringify(DEFAULT_PRESETS.map(p => p.id))
+        );
+
+        if (addedCount > 0) {
+          savePresets();
+          renderPresets();
+          showToast(`已成功合併 ${addedCount} 項最新內建菜單！`);
+        } else {
+          showToast('目前已包含所有最新內建菜單，無需重複合併');
+        }
+      }
+
+      // ========================================================================
+      // 8. 跨裝置與筆記整合 (Markdown 摘要複製 & JSON 備份/還原)
+      // ========================================================================
+      function copyMarkdownSummary() {
+        const log = getDayLog(currentDateStr);
+        const targetKcal = log.items.length > 0 ? log.targetKcal : settings.targetKcal;
+        const targetProtein = log.items.length > 0 ? log.targetProtein : settings.targetProtein;
+        const totalKcal = roundNum(log.items.reduce((s, i) => s + (Number(i.kcal) || 0), 0));
+        const totalProtein = roundNum(log.items.reduce((s, i) => s + (Number(i.protein) || 0), 0));
+
+        const kcalStatus = totalKcal <= targetKcal ? `剩餘 ${roundNum(targetKcal - totalKcal)} kcal` : `超出 ${roundNum(totalKcal - targetKcal)} kcal`;
+        const proteinStatus = totalProtein >= targetProtein ? '已達標 ✅' : `還差 ${roundNum(targetProtein - totalProtein)} g`;
+
+        let md = `### 🥗 飲食紀錄 (${currentDateStr})\n`;
+        md += `- **熱量**：${totalKcal} / ${targetKcal} kcal（${kcalStatus}）\n`;
+        md += `- **蛋白質**：${totalProtein} / ${targetProtein} g（${proteinStatus}）\n\n`;
+
+        if (log.items.length === 0) {
+          md += `_當日尚無飲食明細_\n`;
+        } else {
+          md += `| 時間/餐別 | 品項 | 熱量/蛋白 |\n`;
+          md += `| :--- | :--- | :--- |\n`;
+          // 依時間正序排列匯出較符合閱讀習慣
+          const ordered = [...log.items].reverse();
+          ordered.forEach(item => {
+            const safeName = item.name.replace(/\|/g, '/');
+            const catPrefix = item.category ? `[${item.category}] ` : '';
+            md += `| ${item.time} ${item.meal} | ${catPrefix}${safeName} | ${item.kcal} kcal / ${item.protein}g |\n`;
+          });
+        }
+
+        copyTextToClipboard(md);
+      }
+
+      function copyTextToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          const ok = document.execCommand('copy');
+          if (ok) {
+            showToast('已複製 Markdown 摘要，可直接貼入筆記！');
+          } else {
+            showToast('複製失敗，請手動選取複製');
+          }
+        } catch (err) {
+          showToast('瀏覽器不支援自動複製');
+        } finally {
+          document.body.removeChild(textarea);
+        }
+      }
+
+      function exportJsonBackup() {
+        const logs = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(STORAGE_KEYS.LOG_PREFIX)) {
+            const datePart = key.slice(STORAGE_KEYS.LOG_PREFIX.length);
+            try {
+              logs[datePart] = JSON.parse(localStorage.getItem(key));
+            } catch (e) { /* 略過損毀鍵 */ }
+          }
+        }
+
+        const payload = {
+          app: 'Pure Nutrition Tracker',
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          settings,
+          presets,
+          logs
+        };
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pure-nutrition-backup-${getTodayDateStr()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        settings.lastBackupAt = Date.now();
+        saveSettings();
+        renderBackupStatus();
+        showToast('已匯出 JSON 備份檔案');
+      }
+
+      function handleImportJsonFile(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (!data || typeof data !== 'object' || !data.logs) {
+              showToast('檔案格式錯誤：非有效的 Pure Nutrition 備份檔');
+              return;
+            }
+
+            if (data.settings && typeof data.settings === 'object') {
+              settings = { ...settings, ...data.settings };
+              saveSettings();
+            }
+
+            if (Array.isArray(data.presets) && data.presets.length > 0) {
+              presets = data.presets.map(p => ({
+                ...p,
+                category: (p.category && String(p.category).trim()) ? String(p.category).trim() : '超商'
+              }));
+              savePresets();
+            }
+
+            let importedDays = 0;
+            Object.keys(data.logs).forEach(dateKey => {
+              if (/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+                saveDayLog(dateKey, data.logs[dateKey]);
+                importedDays++;
+              }
+            });
+
+            renderAll();
+            showToast(`成功還原 ${importedDays} 天的歷史飲食紀錄！`);
+          } catch (err) {
+            showToast('解析 JSON 檔案失敗，請確認檔案未損毀');
+          } finally {
+            event.target.value = '';
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // ========================================================================
+      // 9. 通知提示條 (Toast & Toast Undo) 與安全跳脫
+      // ========================================================================
+      let activeToastTimer = null;
+
+      function showToast(message, withUndo = false) {
+        const container = document.getElementById('toastContainer');
+        container.innerHTML = '';
+        if (activeToastTimer) {
+          clearTimeout(activeToastTimer);
+          activeToastTimer = null;
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = message;
+        toast.appendChild(textSpan);
+
+        if (withUndo) {
+          const undoBtn = document.createElement('button');
+          undoBtn.type = 'button';
+          undoBtn.className = 'toast-undo-btn';
+          undoBtn.textContent = '點擊復原';
+          undoBtn.addEventListener('click', () => {
+            container.innerHTML = '';
+            undoLastDelete();
+          });
+          toast.appendChild(undoBtn);
+        }
+
+        container.appendChild(toast);
+
+        activeToastTimer = setTimeout(() => {
+          if (container.contains(toast)) {
+            container.removeChild(toast);
+          }
+          if (withUndo) {
+            undoBuffer = null;
+          }
+        }, withUndo ? 3500 : 2400);
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      // ========================================================================
+      // 10. 事件監聽器綁定
+      // ========================================================================
+      function bindEvents() {
+        // 深淺色模式切換
+        document.getElementById('themeToggleBtn').addEventListener('click', () => {
+          settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
+          saveSettings();
+          applyTheme();
+        });
+
+        // 日期切換導航
+        document.getElementById('prevDayBtn').addEventListener('click', () => {
+          currentDateStr = shiftDateStr(currentDateStr, -1);
+          renderAll();
+        });
+
+        document.getElementById('nextDayBtn').addEventListener('click', () => {
+          currentDateStr = shiftDateStr(currentDateStr, 1);
+          renderAll();
+        });
+
+        document.getElementById('backToTodayBtn').addEventListener('click', () => {
+          currentDateStr = getTodayDateStr();
+          renderAll();
+        });
+
+        document.getElementById('dateDisplayBtn').addEventListener('click', () => {
+          const picker = document.getElementById('datePickerInput');
+          if (typeof picker.showPicker === 'function') {
+            picker.showPicker();
+          } else {
+            picker.click();
+          }
+        });
+
+        document.getElementById('datePickerInput').addEventListener('change', (e) => {
+          if (e.target.value) {
+            currentDateStr = e.target.value;
+            renderAll();
+          }
+        });
+
+        // 份量倍率切換
+        document.querySelectorAll('#portionControlBar .portion-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            selectedMultiplier = Number(btn.getAttribute('data-mult'));
+            renderPortionBar();
+            renderPresets();
+          });
+        });
+
+        // 快捷餐別手動覆寫切換
+        document.querySelectorAll('#quickMealControlBar .quick-meal-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            selectedQuickMeal = btn.getAttribute('data-qmeal');
+            renderPortionBar();
+          });
+        });
+
+        // 管理快捷模式切換
+        document.getElementById('toggleManagePresetsBtn').addEventListener('click', () => {
+          isManagePresetsMode = !isManagePresetsMode;
+          renderPresets();
+        });
+
+        document.getElementById('openAddPresetBtn').addEventListener('click', () => openPresetModal(null));
+        document.getElementById('mergeLatestPresetsBtn').addEventListener('click', mergeLatestBuiltinPresets);
+        document.getElementById('closePresetModalBtn').addEventListener('click', closePresetModal);
+        document.getElementById('cancelPresetModalBtn').addEventListener('click', closePresetModal);
+        document.getElementById('savePresetBtn').addEventListener('click', handleSavePreset);
+
+        // 分類下拉選單切換「自訂新分類」輸入框顯示
+        document.getElementById('presetCategorySelect').addEventListener('change', (e) => {
+          const customGroup = document.getElementById('customCategoryGroup');
+          const customInput = document.getElementById('presetCustomCategoryInput');
+          if (e.target.value === '__custom__') {
+            customGroup.style.display = 'flex';
+            customInput.focus();
+          } else {
+            customGroup.style.display = 'none';
+          }
+        });
+
+        // 重置預設菜單確認視窗
+        const resetModal = document.getElementById('resetConfirmModal');
+        document.getElementById('resetDefaultPresetsBtn').addEventListener('click', () => {
+          resetModal.classList.add('open');
+        });
+        document.getElementById('closeResetModalBtn').addEventListener('click', () => resetModal.classList.remove('open'));
+        document.getElementById('cancelResetBtn').addEventListener('click', () => resetModal.classList.remove('open'));
+        document.getElementById('confirmResetBtn').addEventListener('click', resetToDefaultPresets);
+
+        // 手動輸入表單餐別選擇
+        document.querySelectorAll('#mealSelectorGroup .meal-chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            selectedManualMeal = chip.getAttribute('data-meal');
+            renderMealSelector();
+          });
+        });
+
+        // 手動輸入表單送出
+        document.getElementById('manualEntryForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const nameInput = document.getElementById('foodNameInput');
+          const kcalInput = document.getElementById('foodKcalInput');
+          const proteinInput = document.getElementById('foodProteinInput');
+
+          const kcalVal = Number(kcalInput.value);
+          const proteinVal = Number(proteinInput.value);
+
+          if (kcalInput.value === '' || isNaN(kcalVal) || kcalVal < 0) {
+            showToast('請輸入有效的熱量數值');
+            kcalInput.focus();
+            return;
+          }
+          if (proteinInput.value === '' || isNaN(proteinVal) || proteinVal < 0) {
+            showToast('請輸入有效的蛋白質數值');
+            proteinInput.focus();
+            return;
+          }
+
+          const entry = addFoodEntry({
+            name: nameInput.value.trim() || '外食紀錄',
+            kcal: kcalVal,
+            protein: proteinVal,
+            meal: selectedManualMeal
+          });
+
+          nameInput.value = '';
+          kcalInput.value = '';
+          proteinInput.value = '';
+          selectedManualMeal = detectCurrentMealByTime();
+          renderMealSelector();
+          showToast(`已紀錄：${entry.name} (+${entry.kcal} kcal / +${entry.protein}g)`);
+        });
+
+        // 目標設定 Modal
+        document.getElementById('openSettingsBtn').addEventListener('click', () => {
+          document.getElementById('settingKcalInput').value = settings.targetKcal;
+          document.getElementById('settingProteinInput').value = settings.targetProtein;
+          document.getElementById('settingsModal').classList.add('open');
+        });
+
+        const closeSettings = () => document.getElementById('settingsModal').classList.remove('open');
+        document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
+        document.getElementById('cancelSettingsBtn').addEventListener('click', closeSettings);
+
+        document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+          const newKcal = Math.round(Number(document.getElementById('settingKcalInput').value));
+          const newProtein = roundNum(Number(document.getElementById('settingProteinInput').value));
+
+          if (isNaN(newKcal) || newKcal < 300 || isNaN(newProtein) || newProtein < 10) {
+            showToast('請輸入合理的熱量上限與蛋白質目標');
+            return;
+          }
+
+          settings.targetKcal = newKcal;
+          settings.targetProtein = newProtein;
+          saveSettings();
+
+          // 若今日有紀錄，同步更新今日目標快照（歷史日期保持原快照不動）
+          const todayStr = getTodayDateStr();
+          const todayLog = getDayLog(todayStr);
+          if (todayLog.items.length > 0) {
+            todayLog.targetKcal = newKcal;
+            todayLog.targetProtein = newProtein;
+            saveDayLog(todayStr, todayLog);
+          }
+
+          closeSettings();
+          renderAll();
+          showToast('已更新每日目標設定');
+        });
+
+        // 點擊 Modal 背景關閉
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+          backdrop.addEventListener('click', (e) => {
+            if (e.target === backdrop) {
+              backdrop.classList.remove('open');
+            }
+          });
+        });
+
+        // Markdown 複製與 JSON 備份/還原
+        document.getElementById('copyMarkdownBtn').addEventListener('click', copyMarkdownSummary);
+        document.getElementById('exportJsonBtn').addEventListener('click', exportJsonBackup);
+        document.getElementById('importJsonBtn').addEventListener('click', () => {
+          document.getElementById('importJsonInput').click();
+        });
+        document.getElementById('importJsonInput').addEventListener('change', handleImportJsonFile);
+      }
+
+      // 啟動應用程式
+      bindEvents();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
