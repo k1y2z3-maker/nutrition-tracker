@@ -941,6 +941,190 @@
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ==========================================================================
+       9. 月曆總覽視窗樣式 (v5 新增)
+       ========================================================================== */
+    .header-pill-btn {
+      height: 44px;
+      padding: 0 12px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+    }
+
+    .header-pill-btn:hover {
+      background-color: var(--bg-subtle);
+      border-color: var(--accent-blue);
+    }
+
+    .calendar-modal-box {
+      max-width: 480px;
+      padding: 16px;
+      gap: 12px;
+    }
+
+    .cal-month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--bg-subtle);
+      border-radius: var(--radius-md);
+      padding: 4px;
+    }
+
+    .cal-month-title {
+      font-size: 0.96rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .cal-summary-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .cal-stat-box {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .cal-stat-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .cal-stat-val {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cal-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding-bottom: 2px;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-cell {
+      min-height: 62px;
+      padding: 5px 2px;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 2px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cal-cell:hover {
+      border-color: var(--accent-blue);
+      background-color: var(--accent-blue-soft);
+    }
+
+    .cal-cell.empty {
+      background: transparent;
+      border-color: transparent;
+      pointer-events: none;
+    }
+
+    .cal-cell.is-today {
+      border-color: var(--accent-blue);
+      box-shadow: inset 0 0 0 1px var(--accent-blue);
+    }
+
+    .cal-cell.is-selected {
+      background-color: var(--accent-blue-soft);
+      border-color: var(--accent-blue);
+    }
+
+    .cal-day-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      width: 100%;
+    }
+
+    .cal-day-num {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .cal-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .cal-dot.green { background-color: var(--status-green); }
+    .cal-dot.red { background-color: var(--status-red); }
+    .cal-dot.blue { background-color: var(--accent-blue); }
+
+    .cal-kcal {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.15;
+    }
+
+    .cal-protein {
+      font-size: 0.64rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      line-height: 1.1;
+    }
+
+    .cal-legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      padding-top: 2px;
+    }
+
+    .cal-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
   </style>
 </head>
 <body>
@@ -958,6 +1142,10 @@
       </div>
 
       <div class="icon-actions">
+        <button id="openCalendarBtn" class="header-pill-btn" title="月曆熱量總覽" aria-label="月曆熱量總覽">
+          <span>📅</span>
+          <span>月曆</span>
+        </button>
         <button id="themeToggleBtn" class="icon-btn" title="切換深色／淺色模式" aria-label="切換深色／淺色模式">
           <!-- 由 JS 動態填入太陽或月亮 SVG -->
         </button>
@@ -1236,6 +1424,51 @@
     </div>
   </div>
 
+  <!-- 月曆熱量總覽 Modal (v5 新增) -->
+  <div id="calendarModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="calendarModalTitle">
+    <div class="modal-box calendar-modal-box">
+      <div class="modal-header">
+        <h2 id="calendarModalTitle" class="modal-title">📅 每日熱量與達標月曆</h2>
+        <button type="button" class="mini-icon-btn" id="closeCalendarModalBtn" aria-label="關閉月曆">✕</button>
+      </div>
+
+      <div class="cal-month-nav">
+        <button type="button" id="calPrevMonthBtn" class="date-nav-btn" title="上個月" aria-label="上個月">&lt;</button>
+        <span id="calMonthTitle" class="cal-month-title">2026年 11月</span>
+        <button type="button" id="calNextMonthBtn" class="date-nav-btn" title="下個月" aria-label="下個月">&gt;</button>
+      </div>
+
+      <div class="cal-summary-bar">
+        <div class="cal-stat-box">
+          <span class="cal-stat-label">本月有紀錄天數</span>
+          <span id="calLoggedDaysText" class="cal-stat-val">0 天</span>
+        </div>
+        <div class="cal-stat-box">
+          <span class="cal-stat-label">紀錄日平均熱量</span>
+          <span id="calAvgKcalText" class="cal-stat-val">0 kcal</span>
+        </div>
+      </div>
+
+      <div class="cal-weekdays">
+        <span>日</span>
+        <span>一</span>
+        <span>二</span>
+        <span>三</span>
+        <span>四</span>
+        <span>五</span>
+        <span>六</span>
+      </div>
+
+      <div id="calGrid" class="cal-grid"></div>
+
+      <div class="cal-legend">
+        <span class="cal-legend-item"><i class="cal-dot green"></i>蛋白達標且熱量內</span>
+        <span class="cal-legend-item"><i class="cal-dot red"></i>熱量超標</span>
+        <span class="cal-legend-item"><i class="cal-dot blue"></i>紀錄中</span>
+      </div>
+    </div>
+  </div>
+
   <!-- 底部 Toast 與刪除復原條容器 -->
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
@@ -1321,6 +1554,8 @@
       let selectedManualMeal = detectCurrentMealByTime();
       let isManagePresetsMode = false;
       let undoBuffer = null; // 暫存最近一次刪除的紀錄供 Toast Undo 復原
+      let calendarViewYear = Number(currentDateStr.split('-')[0]);
+      let calendarViewMonth = Number(currentDateStr.split('-')[1]); // 1-12
 
       // ========================================================================
       // 3. 日期與時間工具函式
@@ -1940,6 +2175,134 @@
       }
 
       // ========================================================================
+      // 6.5 月曆總覽渲染邏輯 (v5 新增)
+      // ========================================================================
+      function openCalendarModal() {
+        const [y, m] = currentDateStr.split('-').map(Number);
+        calendarViewYear = y;
+        calendarViewMonth = m;
+        renderCalendarModal();
+        document.getElementById('calendarModal').classList.add('open');
+      }
+
+      function closeCalendarModal() {
+        document.getElementById('calendarModal').classList.remove('open');
+      }
+
+      function shiftCalendarMonth(delta) {
+        let m = calendarViewMonth + delta;
+        let y = calendarViewYear;
+        if (m < 1) {
+          m = 12;
+          y -= 1;
+        } else if (m > 12) {
+          m = 1;
+          y += 1;
+        }
+        calendarViewYear = y;
+        calendarViewMonth = m;
+        renderCalendarModal();
+      }
+
+      function renderCalendarModal() {
+        const titleEl = document.getElementById('calMonthTitle');
+        const gridEl = document.getElementById('calGrid');
+        const loggedDaysEl = document.getElementById('calLoggedDaysText');
+        const avgKcalEl = document.getElementById('calAvgKcalText');
+
+        const year = calendarViewYear;
+        const month = calendarViewMonth;
+        const monthPad = String(month).padStart(2, '0');
+        titleEl.textContent = `${year}年 ${month}月`;
+
+        const firstWeekday = new Date(year, month - 1, 1).getDay(); // 0=日 ~ 6=六
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const todayStr = getTodayDateStr();
+
+        let loggedDaysCount = 0;
+        let sumLoggedKcal = 0;
+
+        gridEl.innerHTML = '';
+
+        // 補齊月初空白格
+        for (let i = 0; i < firstWeekday; i++) {
+          const emptyCell = document.createElement('div');
+          emptyCell.className = 'cal-cell empty';
+          gridEl.appendChild(emptyCell);
+        }
+
+        // 渲染當月每一天
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayPad = String(day).padStart(2, '0');
+          const dateStr = `${year}-${monthPad}-${dayPad}`;
+          const raw = localStorage.getItem(STORAGE_KEYS.LOG_PREFIX + dateStr);
+
+          let hasData = false;
+          let totalKcal = 0;
+          let totalProtein = 0;
+          let targetKcal = settings.targetKcal;
+          let targetProtein = settings.targetProtein;
+
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw);
+              if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+                hasData = true;
+                targetKcal = Number(parsed.targetKcal) || settings.targetKcal;
+                targetProtein = Number(parsed.targetProtein) || settings.targetProtein;
+                totalKcal = Math.round(parsed.items.reduce((s, it) => s + (Number(it.kcal) || 0), 0));
+                totalProtein = roundNum(parsed.items.reduce((s, it) => s + (Number(it.protein) || 0), 0));
+                loggedDaysCount++;
+                sumLoggedKcal += totalKcal;
+              }
+            } catch (e) { /* 略過損毀資料 */ }
+          }
+
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.className = 'cal-cell';
+          if (dateStr === todayStr) cell.classList.add('is-today');
+          if (dateStr === currentDateStr) cell.classList.add('is-selected');
+
+          let dotHtml = '';
+          let statsHtml = '';
+          if (hasData) {
+            let dotClass = 'blue';
+            if (totalKcal > targetKcal) {
+              dotClass = 'red';
+            } else if (totalProtein >= targetProtein) {
+              dotClass = 'green';
+            }
+            dotHtml = `<span class="cal-dot ${dotClass}"></span>`;
+            statsHtml = `
+              <span class="cal-kcal">${totalKcal}</span>
+              <span class="cal-protein">${totalProtein}g</span>
+            `;
+          }
+
+          cell.innerHTML = `
+            <div class="cal-day-top">
+              <span class="cal-day-num">${day}</span>
+              ${dotHtml}
+            </div>
+            ${statsHtml}
+          `;
+
+          cell.addEventListener('click', () => {
+            currentDateStr = dateStr;
+            closeCalendarModal();
+            renderAll();
+          });
+
+          gridEl.appendChild(cell);
+        }
+
+        loggedDaysEl.textContent = `${loggedDaysCount} 天`;
+        const avgKcal = loggedDaysCount > 0 ? Math.round(sumLoggedKcal / loggedDaysCount) : 0;
+        avgKcalEl.textContent = `${avgKcal} kcal`;
+      }
+
+      // ========================================================================
       // 7. 快捷食物管理邏輯 (新增 / 編輯 / 排序 / 刪除)
       // ========================================================================
       function movePreset(index, direction) {
@@ -2309,6 +2672,12 @@
       // 10. 事件監聽器綁定
       // ========================================================================
       function bindEvents() {
+        // 月曆總覽 Modal 控制 (v5 新增)
+        document.getElementById('openCalendarBtn').addEventListener('click', openCalendarModal);
+        document.getElementById('closeCalendarModalBtn').addEventListener('click', closeCalendarModal);
+        document.getElementById('calPrevMonthBtn').addEventListener('click', () => shiftCalendarMonth(-1));
+        document.getElementById('calNextMonthBtn').addEventListener('click', () => shiftCalendarMonth(1));
+
         // 深淺色模式切換
         document.getElementById('themeToggleBtn').addEventListener('click', () => {
           settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
