@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
   <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
-  <title>Pure Nutrition Tracker v9 — 個人健康與飲食儀表板</title>
+  <title>Pure Nutrition Tracker v9.1 — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
        1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
@@ -1302,6 +1302,16 @@
       line-height: 1.1;
     }
 
+    .cal-cell.cal-tier-green { --tier-ink: #08794d; background-color: rgba(34,197,94,.13); }
+    .cal-cell.cal-tier-orange { --tier-ink: #a65308; background-color: rgba(245,158,11,.15); }
+    .cal-cell.cal-tier-red { --tier-ink: #c52d3b; background-color: rgba(239,68,68,.13); }
+    .cal-cell[class*="cal-tier-"] .cal-cell-cal { color: var(--tier-ink); }
+    .cal-dot.green { background-color: #22a568; }
+    .cal-dot.orange { background-color: #e99522; }
+    .cal-dot.red { background-color: #e34d59; }
+    [data-theme="dark"] .cal-cell.cal-tier-green { --tier-ink: #6ee7a0; }
+    [data-theme="dark"] .cal-cell.cal-tier-orange { --tier-ink: #fbbf68; }
+    [data-theme="dark"] .cal-cell.cal-tier-red { --tier-ink: #fda4af; }
     .cal-cell-pro {
       font-size: 0.62rem;
       font-weight: 600;
@@ -1671,6 +1681,7 @@
             <button type="button" class="cat-choice-pill" data-cat="飲料">飲料</button>
             <button type="button" class="cat-choice-pill" data-cat="星巴克">星巴克</button>
             <button type="button" class="cat-choice-pill" data-cat="速食">速食</button>
+            <button type="button" class="cat-choice-pill" data-cat="便當">便當</button>
             <button type="button" class="cat-choice-pill active" data-cat="自訂">自訂</button>
           </div>
         </div>
@@ -1698,7 +1709,8 @@
           <button type="button" class="cat-choice-pill" data-target-cat="飲料">飲料</button>
           <button type="button" class="cat-choice-pill" data-target-cat="星巴克">星巴克</button>
           <button type="button" class="cat-choice-pill" data-target-cat="速食">速食</button>
-          <button type="button" class="cat-choice-pill active" data-target-cat="自訂">自訂</button>
+          <button type="button" class="cat-choice-pill" data-target-cat="便當">便當</button>
+            <button type="button" class="cat-choice-pill active" data-target-cat="自訂">自訂</button>
         </div>
       </div>
 
@@ -1743,9 +1755,9 @@
       <div id="calMatrixGrid" class="cal-matrix tabular"></div>
 
       <div class="cal-legend">
-        <span class="cal-legend-item"><i class="cal-dot emerald"></i>蛋白達標且熱量內</span>
-        <span class="cal-legend-item"><i class="cal-dot blue"></i>熱量內已紀錄</span>
-        <span class="cal-legend-item"><i class="cal-dot rose"></i>熱量超標</span>
+        <span class="cal-legend-item"><i class="cal-dot green"></i>低於 2000</span>
+        <span class="cal-legend-item"><i class="cal-dot orange"></i>2000–2200</span>
+        <span class="cal-legend-item"><i class="cal-dot red"></i>超過 2200 kcal</span>
       </div>
     </div>
   </div>
@@ -1798,6 +1810,7 @@
             <option value="飲料">飲料</option>
             <option value="星巴克">星巴克</option>
             <option value="速食">速食</option>
+            <option value="便當">便當</option>
             <option value="自訂" selected>自訂</option>
           </select>
         </div>
@@ -1833,7 +1846,7 @@
 
   <script>
     /**
-     * Pure Nutrition Tracker v9 — Apple Health & Bento Grid Engine
+     * Pure Nutrition Tracker v9.1 — Apple Health & Bento Grid Engine
      * 100% 保留並相容既有 localStorage 鍵名與結構：
      * - pnt_settings: { calGoal: 1900, proGoal: 100, theme?: 'system'|'light'|'dark' }
      * - pnt_presets: Array<{ id, name, category, cal, pro, useCount?: number }>
@@ -1851,7 +1864,7 @@
         LOG_PREFIX: 'pnt_logs_'
       };
 
-      const BASE_CATEGORIES = ['常用', '全部', '超商', '飲料', '星巴克', '速食', '自訂'];
+      const BASE_CATEGORIES = ['常用', '全部', '超商', '飲料', '星巴克', '速食', '便當', '自訂'];
       const COLLAPSE_LIMIT = 8;
 
       const DEFAULT_SETTINGS = {
@@ -2615,12 +2628,8 @@
             totalMonthCal += calSum;
             if (proSum >= settings.proGoal) proHitDays++;
 
-            let dotClass = 'blue';
-            if (calSum > settings.calGoal) {
-              dotClass = 'rose';
-            } else if (proSum >= settings.proGoal) {
-              dotClass = 'emerald';
-            }
+            const dotClass = calSum < 2000 ? 'green' : calSum <= 2200 ? 'orange' : 'red';
+            cell.classList.add('cal-tier-' + dotClass);
 
             dotMarkup = `<span class="cal-dot ${dotClass}"></span>`;
             statsMarkup = `
@@ -2673,8 +2682,25 @@
               <div style="font-weight: 700; color: var(--ink-primary);">[${escapeHtml(p.category)}] ${escapeHtml(p.name)}</div>
               <div class="tabular" style="font-size: 0.72rem; color: var(--ink-secondary);">${fmtNum(p.cal)} kcal · ${fmtNum(p.pro)}g P</div>
             </div>
+            <select class="preset-category-edit" aria-label="更改快捷分類" style="width: 88px; min-width: 0; padding: 6px; font-size: 0.75rem; color: var(--ink-primary); background: var(--bg-subtle); border-radius: 8px;"></select>
             <button type="button" class="del-cross-btn" aria-label="移除項目">×</button>
           `;
+          const categorySelect = row.querySelector('.preset-category-edit');
+          const categories = [...new Set([...BASE_CATEGORIES, ...presets.map(item => item.category)])].filter(cat => cat && cat !== '常用' && cat !== '全部');
+          categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            categorySelect.appendChild(option);
+          });
+          categorySelect.value = p.category;
+          categorySelect.addEventListener('change', () => {
+            p.category = categorySelect.value;
+            savePresets();
+            renderManagePresets();
+            renderQuickLogModule();
+            showToast(`已將「${p.name}」移至${p.category}`);
+          });
           row.querySelector('button').addEventListener('click', () => {
             presets = presets.filter(item => item.id !== p.id);
             savePresets();
@@ -2814,7 +2840,7 @@
 
       function openSaveShortcutModal(entry) {
         pendingShortcutEntry = entry;
-        pendingShortcutCategory = ['超商', '飲料', '星巴克', '速食', '自訂'].includes(entry.category)
+        pendingShortcutCategory = ['超商', '飲料', '星巴克', '速食', '便當', '自訂'].includes(entry.category)
           ? entry.category
           : '自訂';
 
