@@ -1665,7 +1665,7 @@
           </div>
           <div class="input-stack">
             <label for="manualProInput">蛋白質 (g)</label>
-            <input type="text" id="manualProInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="0" required />
+            <input type="text" id="manualProInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="0" />
           </div>
         </div>
 
@@ -2986,7 +2986,7 @@
           const proInput = document.getElementById('manualProInput');
 
           const calVal = parseDecimalInput(calInput.value);
-          const proVal = parseDecimalInput(proInput.value);
+          const proVal = proInput.value.trim() === '' ? 0 : parseDecimalInput(proInput.value);
 
           if (isNaN(calVal) || calVal < 0) {
             showToast('請輸入有效的熱量數字');
@@ -3065,57 +3065,6 @@
           renderQuickLogModule();
           renderTimelineSection();
           showToast('已加入常用快捷');
-        });
-
-        // 手動輸入表單送出
-        document.getElementById('quickManualForm').addEventListener('submit', (e) => {
-          e.preventDefault();
-          const nameInput = document.getElementById('manualNameInput');
-          const calInput = document.getElementById('manualCalInput');
-          const proInput = document.getElementById('manualProInput');
-
-          const calVal = parseDecimalInput(calInput.value);
-          const proVal = parseDecimalInput(proInput.value);
-
-          if (isNaN(calVal) || calVal < 0) {
-            showToast('請輸入有效的熱量數字');
-            calInput.focus();
-            return;
-          }
-          if (isNaN(proVal) || proVal < 0) {
-            showToast('請輸入有效的蛋白質數字');
-            proInput.focus();
-            return;
-          }
-
-          const finalName = nameInput.value.trim() || '外食紀錄';
-          const targetCat = (activeCategory !== '全部' && activeCategory !== '常用') ? activeCategory : '自訂';
-          const entry = addLogEntry({
-            name: finalName,
-            category: targetCat,
-            cal: calVal,
-            pro: proVal,
-            meal: activeMealOverride
-          });
-
-          if (saveManualAsPreset) {
-            presets.push({
-              id: 'custom_' + Date.now(),
-              name: finalName,
-              category: targetCat,
-              cal: round1(calVal),
-              pro: round1(proVal)
-            });
-            savePresets();
-            renderQuickLogModule();
-          }
-
-          nameInput.value = '';
-          calInput.value = '';
-          proInput.value = '';
-          showToast(saveManualAsPreset
-            ? `已記錄並存入快捷：${entry.name}`
-            : `已記錄[${entry.meal}] ${entry.name} (+${entry.cal} kcal)`);
         });
 
         // 月曆 Bottom Sheet
