@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
   <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
-  <title>Pure Nutrition Tracker — 個人健康與飲食儀表板</title>
+  <title>Pure Nutrition Tracker v9 — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
        1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
@@ -247,7 +247,7 @@
     .main-viewport {
       max-width: 560px;
       margin: 0 auto;
-      padding: 14px 16px calc(var(--safe-bottom) + 92px);
+      padding: 14px 16px calc(var(--safe-bottom) + 104px);
       display: flex;
       flex-direction: column;
       gap: 14px;
@@ -630,6 +630,64 @@
       color: var(--bg-card);
     }
 
+    /* 快捷餐點即時關鍵字搜尋欄 */
+    .quick-search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .quick-search-icon {
+      position: absolute;
+      left: 12px;
+      font-size: 0.82rem;
+      color: var(--ink-tertiary);
+      pointer-events: none;
+    }
+
+    .quick-search-input {
+      width: 100%;
+      height: 38px;
+      padding: 0 34px 0 32px;
+      border-radius: var(--radius-input);
+      border: 1px solid var(--hairline);
+      background-color: var(--bg-subtle);
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--ink-primary);
+      outline: none;
+    }
+
+    .quick-search-input::placeholder {
+      color: var(--ink-tertiary);
+    }
+
+    .quick-search-input:focus {
+      border-color: var(--accent-cal);
+      background-color: var(--bg-card);
+    }
+
+    .quick-search-clear {
+      position: absolute;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background-color: var(--bg-card);
+      border: 1px solid var(--hairline);
+      color: var(--ink-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-search-clear.visible {
+      display: inline-flex;
+    }
+
     /* 2 欄 Bento 食物快捷卡片網格 */
     .bento-food-grid {
       display: grid;
@@ -637,21 +695,24 @@
       gap: 9px;
     }
 
-    .quick-food-card {
-      position: relative;
+    .expand-presets-btn {
+      width: 100%;
+      height: 38px;
+      margin-top: 10px;
+      border-radius: var(--radius-input);
       background-color: var(--bg-subtle);
       border: 1px solid var(--hairline);
-      border-radius: var(--radius-tile);
-      padding: 12px;
-      min-height: 76px;
-      text-align: left;
+      color: var(--ink-secondary);
+      font-size: 0.8rem;
+      font-weight: 700;
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
     }
 
-    .quick-food-card:hover {
+    .expand-presets-btn:hover {
+      color: var(--ink-primary);
       border-color: var(--hairline-strong);
     }
 
@@ -718,11 +779,108 @@
       font-weight: 700;
     }
 
-    /* 精簡行內手動輸入區 (+ 存為常用快捷開關) */
-    .manual-inline-divider {
-      height: 1px;
-      background-color: var(--hairline);
-      margin: 14px 0 12px;
+    .clean-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 12px;
+      border-radius: var(--radius-input);
+      border: 1px solid var(--hairline);
+      background-color: var(--bg-subtle);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--ink-primary);
+      outline: none;
+    }
+
+    .clean-input::placeholder {
+      color: var(--ink-tertiary);
+    }
+
+    .clean-input:focus {
+      border-color: var(--accent-cal);
+      background-color: var(--bg-card);
+    }
+
+    .primary-action-btn {
+      width: 100%;
+      height: 46px;
+      border-radius: var(--radius-input);
+      background-color: var(--accent-cal);
+      color: #FFFFFF;
+      font-size: 0.92rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* 右下角懸浮「＋ 手動輸入」FAB 按鈕 */
+    .floating-manual-fab {
+      position: fixed;
+      right: max(16px, calc((100vw - 560px) / 2 + 16px));
+      bottom: max(20px, calc(var(--safe-bottom) + 14px));
+      z-index: 65;
+      height: 50px;
+      padding: 0 18px;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-cal);
+      color: #FFFFFF;
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 8px 22px rgba(37, 99, 235, 0.34), 0 2px 6px rgba(0, 0, 0, 0.14);
+    }
+
+    [data-theme="dark"] .floating-manual-fab {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    /* 手動輸入抽屜內的存為快捷開關與分類選擇 */
+    .save-preset-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-input);
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--hairline);
+      color: var(--ink-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .save-preset-toggle.checked {
+      background-color: var(--accent-cal-soft);
+      border-color: var(--accent-cal);
+      color: var(--accent-cal);
+    }
+
+    .cat-select-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .cat-choice-pill {
+      height: 34px;
+      padding: 0 13px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--hairline);
+      color: var(--ink-secondary);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .cat-choice-pill.active {
+      background-color: var(--ink-primary);
+      border-color: var(--ink-primary);
+      color: var(--bg-card);
     }
 
     .manual-sub-header {
@@ -889,27 +1047,50 @@
     .timeline-row-btns {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex-shrink: 0;
     }
 
+    .save-shortcut-btn {
+      height: 30px;
+      padding: 0 9px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--hairline);
+      color: var(--ink-secondary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .save-shortcut-btn:hover {
+      border-color: var(--accent-warn);
+      color: var(--accent-warn);
+    }
+
+    .save-shortcut-btn.saved {
+      background-color: var(--accent-pro-soft);
+      border-color: transparent;
+      color: var(--accent-pro-ink);
+    }
+
     .dup-plus-btn {
-      height: 32px;
-      padding: 0 10px;
+      height: 30px;
+      padding: 0 9px;
       border-radius: var(--radius-pill);
       background-color: var(--accent-cal-soft);
       color: var(--accent-cal);
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 700;
     }
 
     .del-cross-btn {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background-color: var(--bg-subtle);
       color: var(--ink-secondary);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
@@ -1246,7 +1427,7 @@
     .floating-toast-area {
       position: fixed;
       left: 50%;
-      bottom: max(18px, calc(var(--safe-bottom) + 12px));
+      bottom: max(82px, calc(var(--safe-bottom) + 74px));
       transform: translateX(-50%);
       width: calc(100% - 32px);
       max-width: 440px;
@@ -1414,27 +1595,15 @@
 
       <div id="categoryChipsBar" class="category-chips-row" role="tablist" aria-label="餐點分類"></div>
 
-      <div id="bentoFoodGrid" class="bento-food-grid"></div>
-
-      <!-- 精簡行內手動輸入 + 存為常用快捷開關 -->
-      <div class="manual-inline-divider"></div>
-      <div class="manual-sub-header">
-        <span class="manual-sub-label" id="manualMealTagHint">手動輸入 · 自動歸類</span>
-        <button type="button" id="saveAsPresetToggle" class="save-preset-toggle" aria-pressed="false">
-          <span>＋ 存為常用快捷</span>
-        </button>
+      <!-- 即時關鍵字搜尋框 -->
+      <div class="quick-search-wrap">
+        <span class="quick-search-icon" aria-hidden="true">🔍</span>
+        <input type="text" id="quickSearchInput" class="quick-search-input" placeholder="搜尋餐點名稱..." aria-label="搜尋餐點名稱" />
+        <button type="button" id="quickSearchClearBtn" class="quick-search-clear" aria-label="清除搜尋">×</button>
       </div>
 
-      <form id="quickManualForm" class="manual-grid-form" novalidate>
-        <div class="manual-fields-row">
-          <div class="field-full-mobile">
-            <input type="text" id="manualNameInput" class="clean-input" placeholder="餐點名稱（選填）" aria-label="餐點名稱" />
-          </div>
-          <input type="text" id="manualCalInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="熱量 kcal" aria-label="熱量 kcal" required />
-          <input type="text" id="manualProInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="蛋白質 g" aria-label="蛋白質 g" required />
-        </div>
-        <button type="submit" class="primary-action-btn">＋ 記錄這筆飲食</button>
-      </form>
+      <div id="bentoFoodGrid" class="bento-food-grid"></div>
+      <button type="button" id="toggleExpandPresetsBtn" class="expand-presets-btn" style="display: none;"></button>
     </section>
 
     <!-- Section 3: 分餐時間軸明細 -->
@@ -1447,6 +1616,95 @@
       <div id="timelineGroupsContainer" class="timeline-groups-wrap"></div>
     </section>
   </main>
+
+  <!-- 右下角懸浮「＋ 手動輸入」按鈕 -->
+  <button type="button" id="openManualSheetFab" class="floating-manual-fab" aria-label="手動輸入餐點">
+    <span>＋</span>
+    <span>手動輸入</span>
+  </button>
+
+  <!-- 手動新增餐點 Bottom Sheet Modal -->
+  <div id="manualEntrySheet" class="bottom-sheet-mask" role="dialog" aria-modal="true" aria-labelledby="manualSheetHeading">
+    <div class="bottom-sheet-card">
+      <div class="sheet-handle"></div>
+      <div class="sheet-top-bar">
+        <h2 id="manualSheetHeading" class="sheet-heading">手動新增餐點</h2>
+        <button type="button" id="closeManualSheetBtn" class="sheet-dismiss-btn" aria-label="關閉手動輸入">✕</button>
+      </div>
+
+      <div class="setting-block">
+        <div class="setting-block-title">歸屬餐別</div>
+        <div class="meal-pills-bar" id="sheetMealStrip" style="width: 100%; justify-content: space-between;">
+          <button type="button" class="meal-selector-pill" data-sheet-meal="早餐" style="flex: 1;">早餐</button>
+          <button type="button" class="meal-selector-pill" data-sheet-meal="午餐" style="flex: 1;">午餐</button>
+          <button type="button" class="meal-selector-pill" data-sheet-meal="晚餐" style="flex: 1;">晚餐</button>
+          <button type="button" class="meal-selector-pill" data-sheet-meal="點心" style="flex: 1;">點心宵夜</button>
+        </div>
+      </div>
+
+      <form id="quickManualForm" class="setting-block" novalidate>
+        <div class="input-stack">
+          <label for="manualNameInput">餐點名稱</label>
+          <input type="text" id="manualNameInput" class="clean-input" placeholder="例如：健康便當、無糖豆漿" />
+        </div>
+
+        <div class="grid-2-cols">
+          <div class="input-stack">
+            <label for="manualCalInput">熱量 (kcal)</label>
+            <input type="text" id="manualCalInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="0" required />
+          </div>
+          <div class="input-stack">
+            <label for="manualProInput">蛋白質 (g)</label>
+            <input type="text" id="manualProInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="0" required />
+          </div>
+        </div>
+
+        <button type="button" id="saveAsPresetToggle" class="save-preset-toggle" aria-pressed="false">
+          <span>☆ 同時存為常用快捷</span>
+          <span id="saveAsPresetStateTag">未開啟</span>
+        </button>
+
+        <div id="manualPresetCatWrap" class="setting-block" style="display: none;">
+          <div class="setting-block-title">選擇快捷分類</div>
+          <div class="cat-select-pills" id="manualPresetCatPills">
+            <button type="button" class="cat-choice-pill" data-cat="超商">超商</button>
+            <button type="button" class="cat-choice-pill" data-cat="飲料">飲料</button>
+            <button type="button" class="cat-choice-pill" data-cat="星巴克">星巴克</button>
+            <button type="button" class="cat-choice-pill" data-cat="速食">速食</button>
+            <button type="button" class="cat-choice-pill active" data-cat="自訂">自訂</button>
+          </div>
+        </div>
+
+        <button type="submit" class="primary-action-btn" style="margin-top: 4px;">加入紀錄</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 明細項目「☆ 存為快捷」分類選擇 Bottom Sheet -->
+  <div id="saveShortcutSheet" class="bottom-sheet-mask" role="dialog" aria-modal="true" aria-labelledby="saveShortcutHeading">
+    <div class="bottom-sheet-card">
+      <div class="sheet-handle"></div>
+      <div class="sheet-top-bar">
+        <h2 id="saveShortcutHeading" class="sheet-heading">加入常用快捷菜單</h2>
+        <button type="button" id="closeSaveShortcutBtn" class="sheet-dismiss-btn" aria-label="關閉">✕</button>
+      </div>
+
+      <div id="shortcutPreviewCard" class="backup-hint-box" style="color: var(--ink-primary); font-weight: 700; font-size: 0.88rem;"></div>
+
+      <div class="setting-block">
+        <div class="setting-block-title">請選擇要收納的分類</div>
+        <div class="cat-select-pills" id="shortcutTargetCatPills">
+          <button type="button" class="cat-choice-pill" data-target-cat="超商">超商</button>
+          <button type="button" class="cat-choice-pill" data-target-cat="飲料">飲料</button>
+          <button type="button" class="cat-choice-pill" data-target-cat="星巴克">星巴克</button>
+          <button type="button" class="cat-choice-pill" data-target-cat="速食">速食</button>
+          <button type="button" class="cat-choice-pill active" data-target-cat="自訂">自訂</button>
+        </div>
+      </div>
+
+      <button type="button" id="confirmSaveShortcutBtn" class="primary-action-btn">★ 確認存為常用快捷</button>
+    </div>
+  </div>
 
   <!-- 3. 月曆總覽 Bottom Sheet Modal -->
   <div id="calendarSheet" class="bottom-sheet-mask" role="dialog" aria-modal="true" aria-labelledby="calSheetHeading">
@@ -1575,10 +1833,10 @@
 
   <script>
     /**
-     * Pure Nutrition Tracker v8 — Apple Health & Bento Grid Engine
+     * Pure Nutrition Tracker v9 — Apple Health & Bento Grid Engine
      * 100% 保留並相容既有 localStorage 鍵名與結構：
      * - pnt_settings: { calGoal: 1900, proGoal: 100, theme?: 'system'|'light'|'dark' }
-     * - pnt_presets: Array<{ id, name, category, cal, pro }>
+     * - pnt_presets: Array<{ id, name, category, cal, pro, useCount?: number }>
      * - pnt_logs_YYYY-MM-DD: Array<{ id, name, category, meal, cal, pro, time }> (同時相容舊格式讀取)
      */
     (function () {
@@ -1593,7 +1851,8 @@
         LOG_PREFIX: 'pnt_logs_'
       };
 
-      const CATEGORIES = ['全部', '常用', '超商', '飲料', '星巴克', '速食', '自訂'];
+      const BASE_CATEGORIES = ['常用', '全部', '超商', '飲料', '星巴克', '速食', '自訂'];
+      const COLLAPSE_LIMIT = 8;
 
       const DEFAULT_SETTINGS = {
         calGoal: 1900,
@@ -1604,27 +1863,24 @@
       // 內建精選菜單庫 (嚴格無牛)
       const DEFAULT_PRESETS = [
         // 超商
-        { id: 'def_cs_1', category: '超商', name: '7-11 健身餐盒', cal: 480, pro: 28 },
-        { id: 'def_cs_2', category: '超商', name: '全家 健身餐盒', cal: 470, pro: 27 },
-        { id: 'def_cs_3', category: '超商', name: '統一無加糖高纖豆漿', cal: 160, pro: 14.5 },
-        { id: 'def_cs_4', category: '超商', name: '希臘優格', cal: 110, pro: 10 },
-        { id: 'def_cs_5', category: '超商', name: '茶葉蛋 2顆', cal: 140, pro: 14 },
-        { id: 'def_cs_6', category: '超商', name: '雞胸肉', cal: 130, pro: 24 },
+        { id: 'def_cs_1', category: '超商', name: '7-11 健身餐盒', cal: 520, pro: 32, useCount: 0 },
+        { id: 'def_cs_2', category: '超商', name: '統一無加糖高纖豆漿', cal: 160, pro: 15.2, useCount: 0 },
+        { id: 'def_cs_3', category: '超商', name: '茶葉蛋', cal: 75, pro: 7, useCount: 0 },
+        { id: 'def_cs_4', category: '超商', name: '雞胸肉', cal: 120, pro: 24, useCount: 0 },
+        { id: 'def_cs_5', category: '超商', name: '希臘優格', cal: 130, pro: 10, useCount: 0 },
 
         // 飲料
-        { id: 'def_dr_1', category: '飲料', name: '超商美式', cal: 8, pro: 0.6 },
-        { id: 'def_dr_2', category: '飲料', name: '超商拿鐵', cal: 185, pro: 6 },
+        { id: 'def_dr_1', category: '飲料', name: '超商美式', cal: 8, pro: 0.6, useCount: 0 },
+        { id: 'def_dr_2', category: '飲料', name: '超商拿鐵', cal: 185, pro: 6, useCount: 0 },
 
         // 星巴克
-        { id: 'def_sb_1', category: '星巴克', name: '無糖拿鐵 Grande', cal: 150, pro: 10 },
-        { id: 'def_sb_2', category: '星巴克', name: '火腿起司可頌', cal: 320, pro: 12 },
-        { id: 'def_sb_3', category: '星巴克', name: '雞肉可頌堡', cal: 360, pro: 18 },
+        { id: 'def_sb_1', category: '星巴克', name: '烤雞生吐司三明治', cal: 380, pro: 21, useCount: 0 },
+        { id: 'def_sb_2', category: '星巴克', name: '無糖拿鐵大杯', cal: 180, pro: 12, useCount: 0 },
 
         // 速食 (無牛)
-        { id: 'def_ff_1', category: '速食', name: '麥當勞 青花椒香麻咔啦雞腿堡', cal: 530, pro: 23 },
-        { id: 'def_ff_2', category: '速食', name: '麥當勞 原味蛋撻', cal: 185, pro: 3 },
-        { id: 'def_ff_3', category: '速食', name: '肯德基 咔啦雞腿堡', cal: 510, pro: 22 },
-        { id: 'def_ff_4', category: '速食', name: '肯德基 原味蛋撻', cal: 182, pro: 3 }
+        { id: 'def_ff_1', category: '速食', name: '麥當勞 嫩煎雞腿堡', cal: 363, pro: 23, useCount: 0 },
+        { id: 'def_ff_2', category: '速食', name: '肯德基 青花椒香麻咔啦雞腿堡', cal: 510, pro: 24, useCount: 0 },
+        { id: 'def_ff_3', category: '速食', name: '肯德基 原味蛋撻', cal: 182, pro: 3, useCount: 0 }
       ];
 
       // ======================================================================
@@ -1633,9 +1889,20 @@
       let settings = loadSettings();
       let presets = loadPresets();
       let selectedDate = getTodayStr();
-      let activeCategory = '全部';
+      let activeCategory = '常用';
       let activeMealOverride = '自動'; // '自動' | '早餐' | '午餐' | '晚餐' | '點心'
+      let quickSearchQuery = '';
+      let isQuickListExpanded = false;
+
+      // 手動輸入抽屜狀態
+      let sheetMealSelection = '早餐';
       let saveManualAsPreset = false;
+      let manualPresetCategory = '自訂';
+
+      // 明細存為快捷抽屜狀態
+      let pendingShortcutEntry = null;
+      let pendingShortcutCategory = '自訂';
+
       let lastDeletedBackup = null;
       let calMonthYear = Number(selectedDate.split('-')[0]);
       let calMonthNum = Number(selectedDate.split('-')[1]);
@@ -1679,8 +1946,7 @@
           }
           const parsed = JSON.parse(raw);
           if (!Array.isArray(parsed)) return DEFAULT_PRESETS.map(p => ({ ...p }));
-
-          // 正規化欄位 (支援 cal/pro 與舊版 kcal/protein) 並排除任何含牛品項
+          // 正規化欄位 (支援 cal/pro 與舊版 kcal/protein，補齊 useCount) 並排除任何含牛品項
           const list = parsed
             .filter(item => item && !String(item.name || '').includes('牛'))
             .map(item => ({
@@ -1688,10 +1954,11 @@
               name: String(item.name || ''),
               category: item.category || '自訂',
               cal: Number(item.cal ?? item.kcal) || 0,
-              pro: Number(item.pro ?? item.protein) || 0
+              pro: Number(item.pro ?? item.protein) || 0,
+              useCount: Number(item.useCount) || 0
             }));
 
-          // 安全合併缺漏的預設品項（例如新增的「飲料」品項），不覆蓋使用者自訂項目
+          // 安全合併缺漏的預設品項（不覆蓋使用者自訂項目）
           const existingNames = new Set(list.map(p => p.name));
           let merged = false;
           DEFAULT_PRESETS.forEach(def => {
@@ -2060,44 +2327,84 @@
           }
         });
 
-        document.getElementById('manualMealTagHint').textContent =
-          activeMealOverride === '自動' ? `手動輸入 · 自動歸類 (${autoMeal})` : `手動輸入 · 指定 (${activeMealOverride})`;
+        // 動態彙整分類膠囊列（保留固定順序 + 任何使用者自訂分類）
+        const dynamicCats = [...BASE_CATEGORIES];
+        presets.forEach(p => {
+          if (p.category && !dynamicCats.includes(p.category) && p.category !== '全部' && p.category !== '常用') {
+            dynamicCats.push(p.category);
+          }
+        });
 
-        // 分類膠囊列
         const catBar = document.getElementById('categoryChipsBar');
         catBar.innerHTML = '';
-        CATEGORIES.forEach(cat => {
+        dynamicCats.forEach(cat => {
           const chip = document.createElement('button');
           chip.type = 'button';
           chip.className = 'cat-pill-btn' + (cat === activeCategory ? ' active' : '');
           chip.textContent = cat;
           chip.addEventListener('click', () => {
             activeCategory = cat;
+            isQuickListExpanded = false;
             renderQuickLogModule();
           });
           catBar.appendChild(chip);
         });
 
-        // 2 欄 Bento 快捷食物卡片
-        const grid = document.getElementById('bentoFoodGrid');
-        grid.innerHTML = '';
+        // 篩選與排序品項
+        const keyword = quickSearchQuery.trim().toLowerCase();
+        const clearBtn = document.getElementById('quickSearchClearBtn');
+        clearBtn.classList.toggle('visible', keyword.length > 0);
 
         let filtered = [];
-        if (activeCategory === '全部') {
-          filtered = presets;
+        if (keyword.length > 0) {
+          // 有輸入搜尋關鍵字時，跨全品項即時過濾
+          filtered = presets.filter(p =>
+            p.name.toLowerCase().includes(keyword) || (p.category || '').toLowerCase().includes(keyword)
+          );
         } else if (activeCategory === '常用') {
-          const customOnes = presets.filter(p => p.category === '自訂' || String(p.id || '').startsWith('custom_'));
-          filtered = customOnes.length > 0 ? customOnes : presets.slice(0, 6);
+          // 常用分頁：依使用次數 (useCount) 由高至低排序，同時優先納入使用者自訂項目
+          const sorted = [...presets].sort((a, b) => {
+            const diff = (Number(b.useCount) || 0) - (Number(a.useCount) || 0);
+            if (diff !== 0) return diff;
+            const aCustom = (a.category === '自訂' || String(a.id || '').startsWith('custom_')) ? 1 : 0;
+            const bCustom = (b.category === '自訂' || String(b.id || '').startsWith('custom_')) ? 1 : 0;
+            return bCustom - aCustom;
+          });
+          filtered = sorted;
+        } else if (activeCategory === '全部') {
+          filtered = presets;
         } else {
           filtered = presets.filter(p => p.category === activeCategory);
         }
 
+        // 2 欄 Bento 快捷食物卡片渲染（超過 8 項且未搜尋時預設摺疊）
+        const grid = document.getElementById('bentoFoodGrid');
+        const expandBtn = document.getElementById('toggleExpandPresetsBtn');
+        grid.innerHTML = '';
+
         if (filtered.length === 0) {
-          grid.innerHTML = `<div class="empty-timeline-box" style="grid-column: 1 / -1; padding: 18px 12px;">此分類尚無項目，可透過下方手動輸入並勾選「存為常用快捷」新增</div>`;
+          expandBtn.style.display = 'none';
+          grid.innerHTML = `<div class="empty-timeline-box" style="grid-column: 1 / -1; padding: 18px 12px;">${
+            keyword ? `找不到符合「${escapeHtml(quickSearchQuery)}」的餐點，可點右下角「＋ 手動輸入」記錄` : '此分類尚無項目，可點右下角「＋ 手動輸入」並勾選存為快捷'
+          }</div>`;
           return;
         }
 
-        filtered.forEach(item => {
+        const shouldCollapse = keyword.length === 0 && filtered.length > COLLAPSE_LIMIT;
+        const visibleItems = (shouldCollapse && !isQuickListExpanded)
+          ? filtered.slice(0, COLLAPSE_LIMIT)
+          : filtered;
+
+        if (shouldCollapse) {
+          expandBtn.style.display = 'flex';
+          expandBtn.textContent = isQuickListExpanded
+            ? '收合清單 ▲'
+            : `展開全部 (共 ${filtered.length} 項) ▼`;
+        } else {
+          expandBtn.style.display = 'none';
+        }
+
+        visibleItems.forEach(item => {
           const isCustom = item.category === '自訂' || String(item.id || '').startsWith('custom_');
           const card = document.createElement('div');
           card.className = 'quick-food-card';
@@ -2129,6 +2436,10 @@
           }
 
           card.addEventListener('click', () => {
+            // 累計常用點擊次數
+            item.useCount = (Number(item.useCount) || 0) + 1;
+            savePresets();
+
             const added = addLogEntry({
               name: item.name,
               category: item.category,
@@ -2142,13 +2453,22 @@
         });
       }
 
+      function isEntryAlreadyInPresets(entry) {
+        const targetName = String(entry.name || '').trim().toLowerCase();
+        const targetCal = round1(Number(entry.cal) || 0);
+        return presets.some(p =>
+          String(p.name || '').trim().toLowerCase() === targetName &&
+          round1(Number(p.cal) || 0) === targetCal
+        );
+      }
+
       function renderTimelineSection() {
         const logs = getLogsForDate(selectedDate);
         const container = document.getElementById('timelineGroupsContainer');
         document.getElementById('timelineCountBadge').textContent = `${logs.length} 筆`;
 
         if (logs.length === 0) {
-          container.innerHTML = `<div class="empty-timeline-box">尚無飲食紀錄，點擊上方快捷方塊即可一秒記錄</div>`;
+          container.innerHTML = `<div class="empty-timeline-box">尚無飲食紀錄，點擊上方快捷方塊或右下角「＋ 手動輸入」即可記錄</div>`;
           return;
         }
 
@@ -2157,7 +2477,7 @@
           '早餐': '🌅 早餐',
           '午餐': '☀️ 午餐',
           '晚餐': '🌙 晚餐',
-          '點心': '☕ 點心'
+          '點心': '☕ 點心 / 宵夜'
         };
 
         const grouped = { '早餐': [], '午餐': [], '晚餐': [], '點心': [] };
@@ -2186,6 +2506,7 @@
           card.className = 'meal-items-card';
 
           entries.forEach(entry => {
+            const alreadySaved = isEntryAlreadyInPresets(entry);
             const row = document.createElement('div');
             row.className = 'timeline-row';
             row.innerHTML = `
@@ -2200,10 +2521,21 @@
                 </div>
               </div>
               <div class="timeline-row-btns">
+                <button type="button" class="save-shortcut-btn ${alreadySaved ? 'saved' : ''}" title="${alreadySaved ? '已在常用快捷中' : '存為常用快捷'}">
+                  ${alreadySaved ? '★ 已存快捷' : '☆ 存為快捷'}
+                </button>
                 <button type="button" class="dup-plus-btn" title="再記一筆">+1</button>
                 <button type="button" class="del-cross-btn" aria-label="刪除紀錄">×</button>
               </div>
             `;
+
+            row.querySelector('.save-shortcut-btn').addEventListener('click', () => {
+              if (isEntryAlreadyInPresets(entry)) {
+                showToast(`「${entry.name}」已在常用快捷清單中`);
+                return;
+              }
+              openSaveShortcutModal(entry);
+            });
 
             row.querySelector('.dup-plus-btn').addEventListener('click', () => {
               addLogEntry({
@@ -2414,7 +2746,8 @@
                 name: String(p.name || ''),
                 category: p.category || '自訂',
                 cal: Number(p.cal ?? p.kcal) || 0,
-                pro: Number(p.pro ?? p.protein) || 0
+                pro: Number(p.pro ?? p.protein) || 0,
+                useCount: Number(p.useCount) || 0
               }));
               savePresets();
             }
@@ -2445,7 +2778,58 @@
       }
 
       // ======================================================================
-      // 9. iOS 浮動 Toast + Undo 提示
+      // 9. 手動輸入抽屜 & 明細一鍵存為快捷抽屜控制
+      // ======================================================================
+      function openManualEntryModal() {
+        sheetMealSelection = activeMealOverride === '自動' ? detectMealByTime() : activeMealOverride;
+        syncManualSheetMealPills();
+
+        saveManualAsPreset = false;
+        const toggleBtn = document.getElementById('saveAsPresetToggle');
+        toggleBtn.classList.remove('checked');
+        toggleBtn.setAttribute('aria-pressed', 'false');
+        document.getElementById('saveAsPresetStateTag').textContent = '未開啟';
+        document.getElementById('manualPresetCatWrap').style.display = 'none';
+
+        manualPresetCategory = (activeCategory !== '全部' && activeCategory !== '常用') ? activeCategory : '自訂';
+        syncManualPresetCatPills();
+
+        document.getElementById('manualEntrySheet').classList.add('open');
+        setTimeout(() => {
+          document.getElementById('manualNameInput').focus();
+        }, 120);
+      }
+
+      function syncManualSheetMealPills() {
+        document.querySelectorAll('#sheetMealStrip .meal-selector-pill').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-sheet-meal') === sheetMealSelection);
+        });
+      }
+
+      function syncManualPresetCatPills() {
+        document.querySelectorAll('#manualPresetCatPills .cat-choice-pill').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-cat') === manualPresetCategory);
+        });
+      }
+
+      function openSaveShortcutModal(entry) {
+        pendingShortcutEntry = entry;
+        pendingShortcutCategory = ['超商', '飲料', '星巴克', '速食', '自訂'].includes(entry.category)
+          ? entry.category
+          : '自訂';
+
+        document.getElementById('shortcutPreviewCard').textContent =
+          `${entry.name} · ${fmtNum(entry.cal)} kcal · ${fmtNum(entry.pro)}g 蛋白質`;
+
+        document.querySelectorAll('#shortcutTargetCatPills .cat-choice-pill').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-target-cat') === pendingShortcutCategory);
+        });
+
+        document.getElementById('saveShortcutSheet').classList.add('open');
+      }
+
+      // ======================================================================
+      // 10. iOS 浮動 Toast + Undo 提示
       // ======================================================================
       let toastTimeout = null;
 
@@ -2517,15 +2901,144 @@
           });
         });
 
+        // 快捷搜尋欄與展開摺疊按鈕
+        const searchInput = document.getElementById('quickSearchInput');
+        searchInput.addEventListener('input', (e) => {
+          quickSearchQuery = e.target.value;
+          isQuickListExpanded = false;
+          renderQuickLogModule();
+        });
+
+        document.getElementById('quickSearchClearBtn').addEventListener('click', () => {
+          quickSearchQuery = '';
+          searchInput.value = '';
+          isQuickListExpanded = false;
+          renderQuickLogModule();
+          searchInput.focus();
+        });
+
+        document.getElementById('toggleExpandPresetsBtn').addEventListener('click', () => {
+          isQuickListExpanded = !isQuickListExpanded;
+          renderQuickLogModule();
+        });
+
+        // 右下角「＋ 手動輸入」FAB 與抽屜事件
+        document.getElementById('openManualSheetFab').addEventListener('click', openManualEntryModal);
+        document.getElementById('closeManualSheetBtn').addEventListener('click', () => {
+          document.getElementById('manualEntrySheet').classList.remove('open');
+        });
+
+        document.querySelectorAll('#sheetMealStrip .meal-selector-pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            sheetMealSelection = btn.getAttribute('data-sheet-meal');
+            syncManualSheetMealPills();
+          });
+        });
+
+        document.querySelectorAll('#manualPresetCatPills .cat-choice-pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            manualPresetCategory = btn.getAttribute('data-cat');
+            syncManualPresetCatPills();
+          });
+        });
+
         // 存為常用快捷開關
         const savePresetToggleBtn = document.getElementById('saveAsPresetToggle');
         savePresetToggleBtn.addEventListener('click', () => {
           saveManualAsPreset = !saveManualAsPreset;
           savePresetToggleBtn.classList.toggle('checked', saveManualAsPreset);
           savePresetToggleBtn.setAttribute('aria-pressed', String(saveManualAsPreset));
-          savePresetToggleBtn.innerHTML = saveManualAsPreset
-            ? '<span>✓ 同時存為常用快捷</span>'
-            : '<span>＋ 存為常用快捷</span>';
+          document.getElementById('saveAsPresetStateTag').textContent = saveManualAsPreset ? '已開啟 ✓' : '未開啟';
+          document.getElementById('manualPresetCatWrap').style.display = saveManualAsPreset ? 'flex' : 'none';
+        });
+
+        // 手動輸入表單送出
+        document.getElementById('quickManualForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const nameInput = document.getElementById('manualNameInput');
+          const calInput = document.getElementById('manualCalInput');
+          const proInput = document.getElementById('manualProInput');
+
+          const calVal = parseDecimalInput(calInput.value);
+          const proVal = parseDecimalInput(proInput.value);
+
+          if (isNaN(calVal) || calVal < 0) {
+            showToast('請輸入有效的熱量數字');
+            calInput.focus();
+            return;
+          }
+          if (isNaN(proVal) || proVal < 0) {
+            showToast('請輸入有效的蛋白質數字');
+            proInput.focus();
+            return;
+          }
+
+          const finalName = nameInput.value.trim() || '外食紀錄';
+          const targetCat = saveManualAsPreset ? manualPresetCategory : '自訂';
+          const entry = addLogEntry({
+            name: finalName,
+            category: targetCat,
+            cal: calVal,
+            pro: proVal,
+            meal: sheetMealSelection
+          });
+
+          if (saveManualAsPreset) {
+            presets.unshift({
+              id: 'custom_' + Date.now(),
+              name: finalName,
+              category: manualPresetCategory,
+              cal: round1(calVal),
+              pro: round1(proVal),
+              useCount: 1
+            });
+            savePresets();
+            renderQuickLogModule();
+          }
+
+          nameInput.value = '';
+          calInput.value = '';
+          proInput.value = '';
+          document.getElementById('manualEntrySheet').classList.remove('open');
+
+          showToast(saveManualAsPreset
+            ? `已記錄並加入常用快捷：${entry.name}`
+            : `已記錄[${entry.meal}] ${entry.name} (+${entry.cal} kcal)`);
+        });
+
+        // 明細一鍵「☆ 存為快捷」抽屜事件
+        document.getElementById('closeSaveShortcutBtn').addEventListener('click', () => {
+          document.getElementById('saveShortcutSheet').classList.remove('open');
+          pendingShortcutEntry = null;
+        });
+
+        document.querySelectorAll('#shortcutTargetCatPills .cat-choice-pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            pendingShortcutCategory = btn.getAttribute('data-target-cat');
+            document.querySelectorAll('#shortcutTargetCatPills .cat-choice-pill').forEach(el => {
+              el.classList.toggle('active', el.getAttribute('data-target-cat') === pendingShortcutCategory);
+            });
+          });
+        });
+
+        document.getElementById('confirmSaveShortcutBtn').addEventListener('click', () => {
+          if (!pendingShortcutEntry) return;
+          if (!isEntryAlreadyInPresets(pendingShortcutEntry)) {
+            presets.unshift({
+              id: 'custom_' + Date.now(),
+              name: pendingShortcutEntry.name,
+              category: pendingShortcutCategory,
+              cal: round1(pendingShortcutEntry.cal),
+              pro: round1(pendingShortcutEntry.pro),
+              useCount: 1
+            });
+            savePresets();
+          }
+          document.getElementById('saveShortcutSheet').classList.remove('open');
+          pendingShortcutEntry = null;
+          renderQuickLogModule();
+          renderTimelineSection();
+          showToast('已加入常用快捷');
         });
 
         // 手動輸入表單送出
@@ -2643,7 +3156,8 @@
             name,
             category: catEl.value,
             cal,
-            pro
+            pro,
+            useCount: 0
           });
           savePresets();
           nameEl.value = '';
@@ -2661,6 +3175,14 @@
             if (!existingNames.has(def.name)) {
               presets.push({ ...def });
               addedCount++;
+            }
+          });
+          savePresets();
+          renderManagePresets();
+          renderQuickLogModule();
+          showToast(addedCount > 0 ? `已補齊 ${addedCount} 項預設餐點` : '預設餐點皆已完整存在');
+        });
+
         document.getElementById('forceReloadAppBtn').addEventListener('click', () => {
           showToast('正在強制向伺服器抓取引擎最新版本...');
           setTimeout(() => {
