@@ -1281,11 +1281,11 @@
         <div class="form-row-2">
           <div class="input-group">
             <label for="foodKcalInput">熱量 (kcal) *</label>
-            <input type="number" id="foodKcalInput" class="form-control" inputmode="numeric" min="0" step="1" placeholder="例如：650" required />
+            <input type="text" id="foodKcalInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="例如：650 或 8.5" required />
           </div>
           <div class="input-group">
             <label for="foodProteinInput">蛋白質 (g) *</label>
-            <input type="number" id="foodProteinInput" class="form-control" inputmode="decimal" min="0" step="0.1" placeholder="例如：32" required />
+            <input type="text" id="foodProteinInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="例如：32 或 0.6" required />
           </div>
         </div>
 
@@ -1351,7 +1351,11 @@
       </p>
       <div class="input-group">
         <label for="settingKcalInput">每日熱量上限 (kcal)</label>
-        <input type="number" id="settingKcalInput" class="form-control" inputmode="numeric" min="500" max="10000" step="10" />
+        <input type="text" id="settingKcalInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+      </div>
+      <div class="input-group">
+        <label for="settingProteinInput">每日蛋白質目標 (g)</label>
+        <input type="text" id="settingProteinInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
       </div>
       <div class="input-group">
         <label for="settingProteinInput">每日蛋白質目標 (g)</label>
@@ -1376,6 +1380,7 @@
         <label for="presetCategorySelect">所屬分類 *</label>
         <select id="presetCategorySelect" class="form-control">
           <option value="超商">超商</option>
+          <option value="飲料">飲料</option>
           <option value="星巴克">星巴克</option>
           <option value="速食">速食</option>
           <option value="__custom__">＋ 自訂新分類...</option>
@@ -1392,11 +1397,11 @@
       <div class="form-row-2">
         <div class="input-group">
           <label for="presetKcalInput">熱量 (kcal) *</label>
-          <input type="number" id="presetKcalInput" class="form-control" inputmode="numeric" min="0" step="1" placeholder="120" />
+          <input type="text" id="presetKcalInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="120" />
         </div>
         <div class="input-group">
           <label for="presetProteinInput">蛋白質 (g) *</label>
-          <input type="number" id="presetProteinInput" class="form-control" inputmode="decimal" min="0" step="0.1" placeholder="24" />
+          <input type="text" id="presetProteinInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="24" />
         </div>
       </div>
       <div class="modal-footer">
@@ -1474,11 +1479,11 @@
 
   <script>
     /**
-     * Pure Nutrition Tracker (v4) — 核心狀態與應用程式邏輯
+     * Pure Nutrition Tracker (v6) — 核心狀態與應用程式邏輯
      * 儲存鍵名規範：
      * - pnt_settings : { targetKcal, targetProtein, theme, lastBackupAt }
      * - pnt_presets  : Array<{ id, category, name, kcal, protein }>
-     * - pnt_preset_schema_version : 'v4'
+     * - pnt_preset_schema_version : 'v6'
      * - pnt_seen_builtin_ids : Array<string> (追蹤已匯入過的內建品項 ID，避免刪除後重複跳出)
      * - pnt_logs_YYYY-MM-DD : { targetKcal, targetProtein, items: Array<{ id, name, category, kcal, protein, meal, time }> }
      */
@@ -1486,7 +1491,7 @@
       'use strict';
 
       // ========================================================================
-      // 1. 常數與預設分類菜單庫定義 (v4 精簡無牛版：僅保留超商、星巴克、速食共 17 項)
+      // 1. 常數與預設分類菜單庫定義 (v6：新增「飲料」分類，保留超商、星巴克、速食)
       // ========================================================================
       const STORAGE_KEYS = {
         SETTINGS: 'pnt_settings',
@@ -1496,10 +1501,10 @@
         LOG_PREFIX: 'pnt_logs_'
       };
 
-      const CURRENT_PRESET_SCHEMA_VERSION = 'v4';
-      const BASE_CATEGORIES = ['超商', '星巴克', '速食'];
+      const CURRENT_PRESET_SCHEMA_VERSION = 'v6';
+      const BASE_CATEGORIES = ['超商', '飲料', '星巴克', '速食'];
 
-      // v4 升級時需自動清理的舊版通用餐廳與含牛預設品項
+      // 舊版升級時需自動清理的通用餐廳與含牛預設品項
       const REMOVED_LEGACY_PRESET_IDS = new Set(['rt1', 'rt2', 'rt3', 'rt4', 'rt5', 'rt6']);
       const REMOVED_LEGACY_PRESET_NAMES = new Set([
         '滷雞腿便當 去皮飯半碗',
@@ -1526,6 +1531,10 @@
         { id: 'cs5', category: '超商', name: '茶葉蛋 / 水煮蛋 (1顆)', kcal: 75, protein: 7 },
         { id: 'cs6', category: '超商', name: '超商即食雞胸肉', kcal: 120, protein: 23 },
 
+        // 飲料 (2項)
+        { id: 'dr1', category: '飲料', name: '超商美式', kcal: 8, protein: 0.6 },
+        { id: 'dr2', category: '飲料', name: '超商拿鐵', kcal: 185, protein: 6 },
+
         // 星巴克 (3項)
         { id: 'sb1', category: '星巴克', name: '星巴克 總匯三明治', kcal: 513, protein: 27.9 },
         { id: 'sb2', category: '星巴克', name: '星巴克 烤雞生吐司三明治', kcal: 342, protein: 21 },
@@ -1533,9 +1542,9 @@
 
         // 速食 (8項，無牛)
         { id: 'ff8', category: '速食', name: '麥當勞 四塊麥克雞塊', kcal: 174, protein: 10 },
-        { id: 'ff1', category: '速食', name: '麥當勞 嫩煎鷄腿堡', kcal: 363, protein: 26 },
-        { id: 'ff2', category: '速食', name: '麥當勞 麥香鷄', kcal: 352, protein: 14 },
-        { id: 'ff3', category: '速食', name: '麥當勞 勁辣鷄腿堡', kcal: 493, protein: 22 },
+        { id: 'ff1', category: '速食', name: '麥當勞 嫩煎鷄腿堡', kcal: 363, protein: 25 },
+        { id: 'ff2', category: '速食', name: '麥當勞 麥香鷄', kcal: 380, protein: 15 },
+        { id: 'ff3', category: '速食', name: '麥當勞 勁辣鷄腿堡', kcal: 490, protein: 23 },
         { id: 'ff4', category: '速食', name: '麥當勞 麥克鷄塊 6塊', kcal: 270, protein: 15 },
         { id: 'ff5', category: '速食', name: '肯德基 紙包雞', kcal: 354, protein: 34 },
         { id: 'ff6', category: '速食', name: '肯德基 咔啦脆雞 1塊', kcal: 285, protein: 21 },
@@ -1610,6 +1619,14 @@
 
       function roundNum(val) {
         return Math.round(val * 10) / 10;
+      }
+
+      // 解析支援逗號或小數點的數字輸入（相容各語系小數鍵盤）
+      function parseDecimalInput(rawVal) {
+        if (rawVal === null || rawVal === undefined) return NaN;
+        const normalized = String(rawVal).trim().replace(/,/g, '.');
+        if (normalized === '') return NaN;
+        return Number(normalized);
       }
 
       // ========================================================================
@@ -2398,8 +2415,8 @@
         const selectVal = document.getElementById('presetCategorySelect').value;
         const customCatVal = document.getElementById('presetCustomCategoryInput').value.trim();
         const name = document.getElementById('presetNameInput').value.trim();
-        const kcal = roundNum(Number(document.getElementById('presetKcalInput').value));
-        const protein = roundNum(Number(document.getElementById('presetProteinInput').value));
+        const kcal = roundNum(parseDecimalInput(document.getElementById('presetKcalInput').value));
+        const protein = roundNum(parseDecimalInput(document.getElementById('presetProteinInput').value));
 
         const category = selectVal === '__custom__' ? customCatVal : selectVal;
 
@@ -2782,15 +2799,15 @@
           const kcalInput = document.getElementById('foodKcalInput');
           const proteinInput = document.getElementById('foodProteinInput');
 
-          const kcalVal = Number(kcalInput.value);
-          const proteinVal = Number(proteinInput.value);
+          const kcalVal = parseDecimalInput(kcalInput.value);
+          const proteinVal = parseDecimalInput(proteinInput.value);
 
-          if (kcalInput.value === '' || isNaN(kcalVal) || kcalVal < 0) {
+          if (kcalInput.value.trim() === '' || isNaN(kcalVal) || kcalVal < 0) {
             showToast('請輸入有效的熱量數值');
             kcalInput.focus();
             return;
           }
-          if (proteinInput.value === '' || isNaN(proteinVal) || proteinVal < 0) {
+          if (proteinInput.value.trim() === '' || isNaN(proteinVal) || proteinVal < 0) {
             showToast('請輸入有效的蛋白質數值');
             proteinInput.focus();
             return;
@@ -2823,8 +2840,8 @@
         document.getElementById('cancelSettingsBtn').addEventListener('click', closeSettings);
 
         document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-          const newKcal = Math.round(Number(document.getElementById('settingKcalInput').value));
-          const newProtein = roundNum(Number(document.getElementById('settingProteinInput').value));
+          const newKcal = Math.round(parseDecimalInput(document.getElementById('settingKcalInput').value));
+          const newProtein = roundNum(parseDecimalInput(document.getElementById('settingProteinInput').value));
 
           if (isNaN(newKcal) || newKcal < 300 || isNaN(newProtein) || newProtein < 10) {
             showToast('請輸入合理的熱量上限與蛋白質目標');
