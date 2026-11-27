@@ -2,6 +2,9 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -635,6 +638,7 @@
     }
 
     .quick-food-card {
+      position: relative;
       background-color: var(--bg-subtle);
       border: 1px solid var(--hairline);
       border-radius: var(--radius-tile);
@@ -649,6 +653,29 @@
 
     .quick-food-card:hover {
       border-color: var(--hairline-strong);
+    }
+
+    .quick-card-del {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: var(--bg-card);
+      border: 1px solid var(--hairline);
+      color: var(--ink-tertiary);
+      font-size: 0.76rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .quick-card-del:hover {
+      color: var(--accent-over);
+      border-color: var(--accent-over-soft);
     }
 
     .quick-food-top {
@@ -1527,9 +1554,13 @@
       <!-- JSON 匯出與匯入備份 -->
       <div class="setting-block">
         <div class="setting-block-title">資料備份與還原</div>
+      <!-- JSON 匯出與匯入備份 & 強制更新 -->
+      <div class="setting-block">
+        <div class="setting-block-title">版本更新與資料備份</div>
+        <button type="button" id="forceReloadAppBtn" class="secondary-btn" style="width: 100%; border: 1px solid var(--hairline-strong);">🔄 檢查並更新頁面</button>
         <div class="grid-2-cols">
-          <button type="button" id="exportBackupBtn" class="secondary-btn">⬇️ 匯出 JSON 備份</button>
-          <button type="button" id="importBackupBtn" class="secondary-btn">⬆️ 匯入 JSON 還原</button>
+          <button type="button" id="exportBackupBtn" class="secondary-btn">📤 匯出 JSON 備份</button>
+          <button type="button" id="importBackupBtn" class="secondary-btn">📥 匯入 JSON 還原</button>
           <input type="file" id="importBackupFile" accept=".json,application/json" style="display: none;" />
         </div>
         <div class="backup-hint-box">
@@ -1544,11 +1575,11 @@
 
   <script>
     /**
-     * Pure Nutrition Tracker v7 — Apple Health & Bento Grid Engine
+     * Pure Nutrition Tracker v8 — Apple Health & Bento Grid Engine
      * 100% 保留並相容既有 localStorage 鍵名與結構：
      * - pnt_settings: { calGoal: 1900, proGoal: 100, theme?: 'system'|'light'|'dark' }
      * - pnt_presets: Array<{ id, name, category, cal, pro }>
-     * - pnt_logs_YYYY-MM-DD: Array<{ id, name, cal, pro, meal, time }> (同時相容 { items: [...] } 舊格式讀取)
+     * - pnt_logs_YYYY-MM-DD: Array<{ id, name, category, meal, cal, pro, time }> (同時相容舊格式讀取)
      */
     (function () {
       'use strict';
@@ -1562,7 +1593,7 @@
         LOG_PREFIX: 'pnt_logs_'
       };
 
-      const CATEGORIES = ['全部', '超商', '飲料', '星巴克', '速食', '自訂'];
+      const CATEGORIES = ['全部', '常用', '超商', '飲料', '星巴克', '速食', '自訂'];
 
       const DEFAULT_SETTINGS = {
         calGoal: 1900,
@@ -1573,31 +1604,27 @@
       // 內建精選菜單庫 (嚴格無牛)
       const DEFAULT_PRESETS = [
         // 超商
-        { id: 'def_cs_1', category: '超商', name: '7-11 雙拼烤雞握便當', cal: 485, pro: 26 },
-        { id: 'def_cs_2', category: '超商', name: '7-11 鹽烤豬肉便當', cal: 580, pro: 24 },
-        { id: 'def_cs_3', category: '超商', name: '7-11 椒鹽雞胸肉', cal: 135, pro: 25 },
-        { id: 'def_cs_4', category: '超商', name: '統一無加糖高纖豆漿', cal: 161, pro: 13.6 },
-        { id: 'def_cs_5', category: '超商', name: '義美無糖厚濃豆漿', cal: 195, pro: 18 },
-        { id: 'def_cs_6', category: '超商', name: '茶葉蛋', cal: 75, pro: 7 },
-        { id: 'def_cs_7', category: '超商', name: '希臘式優格', cal: 115, pro: 9 },
+        { id: 'def_cs_1', category: '超商', name: '7-11 健身餐盒', cal: 480, pro: 28 },
+        { id: 'def_cs_2', category: '超商', name: '全家 健身餐盒', cal: 470, pro: 27 },
+        { id: 'def_cs_3', category: '超商', name: '統一無加糖高纖豆漿', cal: 160, pro: 14.5 },
+        { id: 'def_cs_4', category: '超商', name: '希臘優格', cal: 110, pro: 10 },
+        { id: 'def_cs_5', category: '超商', name: '茶葉蛋 2顆', cal: 140, pro: 14 },
+        { id: 'def_cs_6', category: '超商', name: '雞胸肉', cal: 130, pro: 24 },
 
         // 飲料
         { id: 'def_dr_1', category: '飲料', name: '超商美式', cal: 8, pro: 0.6 },
         { id: 'def_dr_2', category: '飲料', name: '超商拿鐵', cal: 185, pro: 6 },
 
         // 星巴克
-        { id: 'def_sb_1', category: '星巴克', name: '無糖冰美式 大杯', cal: 15, pro: 1 },
-        { id: 'def_sb_2', category: '星巴克', name: '無糖冰那堤 大杯', cal: 160, pro: 11 },
-        { id: 'def_sb_3', category: '星巴克', name: '烤雞生吐司三明治', cal: 345, pro: 21 },
-        { id: 'def_sb_4', category: '星巴克', name: '起司里肌可頌', cal: 390, pro: 17 },
+        { id: 'def_sb_1', category: '星巴克', name: '無糖拿鐵 Grande', cal: 150, pro: 10 },
+        { id: 'def_sb_2', category: '星巴克', name: '火腿起司可頌', cal: 320, pro: 12 },
+        { id: 'def_sb_3', category: '星巴克', name: '雞肉可頌堡', cal: 360, pro: 18 },
 
         // 速食 (無牛)
-        { id: 'def_ff_1', category: '速食', name: '麥當勞 嫩煎雞腿堡', cal: 363, pro: 26 },
-        { id: 'def_ff_2', category: '速食', name: '麥當勞 麥脆雞腿 1塊', cal: 290, pro: 19 },
-        { id: 'def_ff_3', category: '速食', name: '麥當勞 四塊麥克雞塊', cal: 180, pro: 10 },
-        { id: 'def_ff_4', category: '速食', name: '肯德基 青花椒香麻咔啦雞腿堡', cal: 490, pro: 24 },
-        { id: 'def_ff_5', category: '速食', name: '肯德基 上校薄脆雞 1塊', cal: 270, pro: 20 },
-        { id: 'def_ff_6', category: '速食', name: '肯德基 原味蛋撻', cal: 182, pro: 3 }
+        { id: 'def_ff_1', category: '速食', name: '麥當勞 青花椒香麻咔啦雞腿堡', cal: 530, pro: 23 },
+        { id: 'def_ff_2', category: '速食', name: '麥當勞 原味蛋撻', cal: 185, pro: 3 },
+        { id: 'def_ff_3', category: '速食', name: '肯德基 咔啦雞腿堡', cal: 510, pro: 22 },
+        { id: 'def_ff_4', category: '速食', name: '肯德基 原味蛋撻', cal: 182, pro: 3 }
       ];
 
       // ======================================================================
@@ -1699,6 +1726,7 @@
           return arr.map(entry => ({
             id: entry.id || ('log_' + Math.random().toString(36).slice(2, 8)),
             name: String(entry.name || '飲食紀錄'),
+            category: entry.category || '自訂',
             cal: Number(entry.cal ?? entry.kcal) || 0,
             pro: Number(entry.pro ?? entry.protein) || 0,
             meal: normalizeMealName(entry.meal),
@@ -1781,12 +1809,13 @@
       // ======================================================================
       // 4. 飲食紀錄增刪與 Undo 復原邏輯
       // ======================================================================
-      function addLogEntry({ name, cal, pro, meal }) {
+      function addLogEntry({ name, category, cal, pro, meal }) {
         const logs = getLogsForDate(selectedDate);
         const resolvedMeal = (!meal || meal === '自動') ? detectMealByTime() : normalizeMealName(meal);
         const newEntry = {
           id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
           name: (name || '').trim() || '外食紀錄',
+          category: category || '自訂',
           cal: round1(Number(cal) || 0),
           pro: round1(Number(pro) || 0),
           meal: resolvedMeal,
@@ -2053,16 +2082,31 @@
         const grid = document.getElementById('bentoFoodGrid');
         grid.innerHTML = '';
 
-        const filtered = activeCategory === '全部'
-          ? presets
-          : presets.filter(p => p.category === activeCategory);
+        let filtered = [];
+        if (activeCategory === '全部') {
+          filtered = presets;
+        } else if (activeCategory === '常用') {
+          const customOnes = presets.filter(p => p.category === '自訂' || String(p.id || '').startsWith('custom_'));
+          filtered = customOnes.length > 0 ? customOnes : presets.slice(0, 6);
+        } else {
+          filtered = presets.filter(p => p.category === activeCategory);
+        }
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `<div class="empty-timeline-box" style="grid-column: 1 / -1; padding: 18px 12px;">此分類尚無項目，可透過下方手動輸入並勾選「存為常用快捷」新增</div>`;
+          return;
+        }
 
         filtered.forEach(item => {
-          const card = document.createElement('button');
-          card.type = 'button';
+          const isCustom = item.category === '自訂' || String(item.id || '').startsWith('custom_');
+          const card = document.createElement('div');
           card.className = 'quick-food-card';
+          card.setAttribute('role', 'button');
+          card.setAttribute('tabindex', '0');
+          card.style.cursor = 'pointer';
           card.innerHTML = `
-            <div class="quick-food-top">
+            ${isCustom ? `<button type="button" class="quick-card-del" aria-label="刪除自訂項目">×</button>` : ''}
+            <div class="quick-food-top" style="${isCustom ? 'padding-right: 22px;' : ''}">
               <span class="quick-food-name">${escapeHtml(item.name)}</span>
               <span class="quick-cat-tag">${escapeHtml(item.category)}</span>
             </div>
@@ -2072,9 +2116,22 @@
               <span class="pro-macro-highlight">${fmtNum(item.pro)}g P</span>
             </div>
           `;
+
+          if (isCustom) {
+            const delBtn = card.querySelector('.quick-card-del');
+            delBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              presets = presets.filter(p => p.id !== item.id);
+              savePresets();
+              renderQuickLogModule();
+              showToast(`已移除快捷項目「${item.name}」`);
+            });
+          }
+
           card.addEventListener('click', () => {
             const added = addLogEntry({
               name: item.name,
+              category: item.category,
               cal: item.cal,
               pro: item.pro,
               meal: activeMealOverride
@@ -2151,6 +2208,7 @@
             row.querySelector('.dup-plus-btn').addEventListener('click', () => {
               addLogEntry({
                 name: entry.name,
+                category: entry.category,
                 cal: entry.cal,
                 pro: entry.pro,
                 meal: mealKey
@@ -2309,7 +2367,7 @@
 
         const payload = {
           app: 'Pure Nutrition Tracker',
-          version: 'v7',
+          version: 'v8',
           exportedAt: new Date().toISOString(),
           pnt_settings: settings,
           pnt_presets: presets,
@@ -2492,15 +2550,16 @@
           }
 
           const finalName = nameInput.value.trim() || '外食紀錄';
+          const targetCat = (activeCategory !== '全部' && activeCategory !== '常用') ? activeCategory : '自訂';
           const entry = addLogEntry({
             name: finalName,
+            category: targetCat,
             cal: calVal,
             pro: proVal,
             meal: activeMealOverride
           });
 
           if (saveManualAsPreset) {
-            const targetCat = activeCategory !== '全部' ? activeCategory : '自訂';
             presets.push({
               id: 'custom_' + Date.now(),
               name: finalName,
@@ -2602,12 +2661,12 @@
             if (!existingNames.has(def.name)) {
               presets.push({ ...def });
               addedCount++;
-            }
-          });
-          savePresets();
-          renderManagePresets();
-          renderQuickLogModule();
-          showToast(addedCount > 0 ? `已補齊 ${addedCount} 項預設品項` : '目前已包含全部預設品項');
+        document.getElementById('forceReloadAppBtn').addEventListener('click', () => {
+          showToast('正在強制向伺服器抓取引擎最新版本...');
+          setTimeout(() => {
+            const baseUrl = window.location.href.split('?')[0].split('#')[0];
+            window.location.replace(`${baseUrl}?v=${Date.now()}`);
+          }, 250);
         });
 
         document.getElementById('exportBackupBtn').addEventListener('click', exportJsonBackup);
