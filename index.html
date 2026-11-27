@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
   <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
-  <title>Pure Nutrition Tracker v9.2.2 — 個人健康與飲食儀表板</title>
+  <title>Pure Nutrition Tracker v9.2.3 — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
        1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
@@ -126,15 +126,19 @@
     /* ==========================================================================
        3. 頂部毛玻璃導航列 (Sticky Glass Header + Safe Area Top)
        ========================================================================== */
+    .status-safe-spacer {
+      height: var(--safe-top);
+      background: var(--bg-canvas);
+    }
     .glass-header {
       position: sticky;
-      top: 0;
+      top: var(--safe-top);
       z-index: 50;
       background-color: var(--bg-canvas);
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
       border-bottom: 1px solid var(--hairline);
-      padding: calc(var(--safe-top) + 14px) 16px 10px;
+      padding: 18px 16px 10px;
     }
 
     .header-inner {
@@ -1498,6 +1502,7 @@
 </head>
 <body>
   <!-- 1. 頂部毛玻璃導航列 -->
+  <div class="status-safe-spacer" aria-hidden="true"></div>
   <header class="glass-header">
     <div class="header-inner">
       <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
@@ -1836,6 +1841,7 @@
           <button type="button" id="importBackupBtn" class="secondary-btn">📥 匯入 JSON 還原</button>
           <input type="file" id="importBackupFile" accept=".json,application/json" style="display: none;" />
         </div>
+        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V9.2.3</div>
         <div class="backup-hint-box">
           資料皆安全儲存於此裝置本機空間。刪除主畫面書籤或更換手機前，請先匯出 JSON 備份。
         </div>
