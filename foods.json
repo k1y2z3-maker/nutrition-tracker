@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "foods": [
+    {
+      "id": "def_cs_1",
+      "category": "超商",
+      "name": "7-11 健身餐盒",
+      "cal": 520,
+      "pro": 32
+    },
+    {
+      "id": "def_cs_2",
+      "category": "超商",
+      "name": "統一無加糖高纖豆漿",
+      "cal": 160,
+      "pro": 15.2
+    },
+    {
+      "id": "def_cs_3",
+      "category": "超商",
+      "name": "茶葉蛋",
+      "cal": 75,
+      "pro": 7
+    },
+    {
+      "id": "def_cs_4",
+      "category": "超商",
+      "name": "雞胸肉",
+      "cal": 120,
+      "pro": 24
+    },
+    {
+      "id": "def_cs_5",
+      "category": "超商",
+      "name": "希臘優格",
+      "cal": 130,
+      "pro": 10
+    },
+    {
+      "id": "def_dr_1",
+      "category": "飲料",
+      "name": "超商美式",
+      "cal": 8,
+      "pro": 0.6
+    },
+    {
+      "id": "def_dr_2",
+      "category": "飲料",
+      "name": "超商拿鐵",
+      "cal": 185,
+      "pro": 6
+    },
+    {
+      "id": "def_sb_1",
+      "category": "星巴克",
+      "name": "烤雞生吐司三明治",
+      "cal": 380,
+      "pro": 21
+    },
+    {
+      "id": "def_sb_2",
+      "category": "星巴克",
+      "name": "無糖拿鐵大杯",
+      "cal": 180,
+      "pro": 12
+    },
+    {
+      "id": "def_ff_1",
+      "category": "速食",
+      "name": "麥當勞 嫩煎雞腿堡",
+      "cal": 363,
+      "pro": 23
+    },
+    {
+      "id": "def_ff_2",
+      "category": "速食",
+      "name": "肯德基 青花椒香麻咔啦雞腿堡",
+      "cal": 510,
+      "pro": 24
+    },
+    {
+      "id": "def_ff_3",
+      "category": "速食",
+      "name": "肯德基 原味蛋撻",
+      "cal": 182,
+      "pro": 3
+    }
+  ]
+}

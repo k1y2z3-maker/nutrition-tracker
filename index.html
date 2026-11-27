@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
   <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
-  <title>Pure Nutrition Tracker v9.1 — 個人健康與飲食儀表板</title>
+  <title>Pure Nutrition Tracker v9.2 — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
        1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
@@ -1876,7 +1876,7 @@
       };
 
       // 內建精選菜單庫 (嚴格無牛)
-      const DEFAULT_PRESETS = [
+      let DEFAULT_PRESETS = [
         // 超商
         { id: 'def_cs_1', category: '超商', name: '7-11 健身餐盒', cal: 520, pro: 32, useCount: 0 },
         { id: 'def_cs_2', category: '超商', name: '統一無加糖高纖豆漿', cal: 160, pro: 15.2, useCount: 0 },
@@ -1902,6 +1902,9 @@
       // 2. 狀態管理與向下相容資料載入
       // ======================================================================
       let settings = loadSettings();
+      const LEGACY_FOOD_CATALOG = DEFAULT_PRESETS.map(p => ({...p}));
+      const FOOD_SYNC_KEY = 'pnt_food_catalog_sync_v1';
+      let catalogState = readCatalogState();
       let presets = loadPresets();
       let selectedDate = getTodayStr();
       let activeCategory = '常用';
@@ -1963,7 +1966,7 @@
           if (!Array.isArray(parsed)) return DEFAULT_PRESETS.map(p => ({ ...p }));
           // 正規化欄位 (支援 cal/pro 與舊版 kcal/protein，補齊 useCount) 並排除任何含牛品項
           const list = parsed
-            .filter(item => item && !String(item.name || '').includes('牛'))
+            .filter(item => item)
             .map(item => ({
               id: item.id || ('p_' + Math.random().toString(36).slice(2, 8)),
               name: String(item.name || ''),
@@ -1973,23 +1976,55 @@
               useCount: Number(item.useCount) || 0
             }));
 
-          // 安全合併缺漏的預設品項（不覆蓋使用者自訂項目）
-          const existingNames = new Set(list.map(p => p.name));
-          let merged = false;
-          DEFAULT_PRESETS.forEach(def => {
-            if (!existingNames.has(def.name)) {
-              list.push({ ...def });
-              merged = true;
-            }
-          });
-
-          if (merged) {
-            localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(list));
-          }
           return list;
         } catch (e) {
           return DEFAULT_PRESETS.map(p => ({ ...p }));
         }
+      }
+
+      function readCatalogState() {
+        try { const s = JSON.parse(localStorage.getItem(FOOD_SYNC_KEY)); if (s && Array.isArray(s.foods)) return s; } catch (_) {}
+        return {version: 0, foods: DEFAULT_PRESETS.map(p => ({...p}))};
+      }
+
+      function applyFoodCatalog(next) {
+        if (!next || !Number.isInteger(next.version) || next.version < 1 || !Array.isArray(next.foods)) throw Error('Invalid food catalog');
+        const ids = new Set();
+        for (const p of next.foods) {
+          if (!p || typeof p.id !== 'string' || !p.id.startsWith('def_') || ids.has(p.id) || typeof p.name !== 'string' || !p.name.trim() || typeof p.category !== 'string' || !p.category.trim() || !Number.isFinite(p.cal) || p.cal < 0 || !Number.isFinite(p.pro) || p.pro < 0) throw Error('Invalid food entry');
+          ids.add(p.id);
+        }
+        if (next.version < catalogState.version) return;
+        DEFAULT_PRESETS = next.foods.map(p => ({...p, useCount: 0}));
+        if (next.version === catalogState.version) return;
+        const old = new Map(catalogState.foods.map(p => [p.id,p]));
+        const fresh = new Map(next.foods.map(p => [p.id,p]));
+        const updated = presets.filter(p => !old.has(p.id) || fresh.has(p.id)).map(p => {
+          const before = old.get(p.id), after = fresh.get(p.id);
+          if (!after) return p;
+          const result = {...p};
+          for (const field of ['name','category','cal','pro']) {
+            if (!before || before[field] !== after[field]) result[field] = after[field];
+          }
+          return result;
+        });
+        for (const p of next.foods) {
+          if ((!old.has(p.id) || catalogState.version === 0) && !updated.some(x => x.id === p.id || x.name === p.name)) updated.push({...p,useCount:0});
+        }
+        localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(updated));
+        presets = updated;
+        localStorage.setItem(FOOD_SYNC_KEY, JSON.stringify(next));
+        catalogState = next;
+      }
+
+      async function syncFoodCatalog() {
+        try {
+          const response = await fetch('./foods.json', {cache:'no-store'});
+          if (!response.ok) throw Error('Catalog unavailable');
+          applyFoodCatalog(await response.json());
+          renderApp();
+          renderManagePresets();
+        } catch (err) { console.warn('Food catalog sync:',err); }
       }
 
       function savePresets() {
@@ -2731,6 +2766,7 @@
           exportedAt: new Date().toISOString(),
           pnt_settings: settings,
           pnt_presets: presets,
+          foodCatalog: catalogState,
           logs: allLogs
         };
 
@@ -2793,6 +2829,14 @@
               });
             }
 
+            if (parsed.foodCatalog && Array.isArray(parsed.foodCatalog.foods) && Number.isInteger(parsed.foodCatalog.version)) {
+              catalogState = parsed.foodCatalog;
+              localStorage.setItem(FOOD_SYNC_KEY, JSON.stringify(catalogState));
+            } else {
+              catalogState = {version:0,foods:LEGACY_FOOD_CATALOG};
+              localStorage.setItem(FOOD_SYNC_KEY, JSON.stringify(catalogState));
+            }
+            syncFoodCatalog();
             renderApp();
             renderManagePresets();
             showToast(`已成功還原設定與 ${restoredDays} 天飲食紀錄`);
@@ -3185,6 +3229,7 @@
       // 啟動應用
       bindEvents();
       renderApp();
+      syncFoodCatalog();
     })();
   </script>
 </body>
