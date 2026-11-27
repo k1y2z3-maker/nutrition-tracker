@@ -2,88 +2,84 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Pure Nutrition Tracker — 個人飲食與熱量追蹤</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
+  <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
+  <title>Pure Nutrition Tracker — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
-       1. 設計系統與色彩變數 (支援淺色/深色主題無縫切換)
+       1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
        ========================================================================== */
     :root {
-      --bg-page: #f4f6f9;
-      --bg-card: #ffffff;
-      --bg-subtle: #eef1f5;
-      --bg-input: #f8fafc;
-      --border-color: #e2e8f0;
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #94a3b8;
+      --bg-canvas: #F5F6F8;
+      --bg-card: #FFFFFF;
+      --bg-subtle: #ECEEF2;
+      --bg-glass: rgba(245, 246, 248, 0.84);
 
-      --accent-blue: #2563eb;
-      --accent-blue-hover: #1d4ed8;
-      --accent-blue-soft: rgba(37, 99, 235, 0.1);
+      --ink-primary: #111315;
+      --ink-secondary: #687076;
+      --ink-tertiary: #889096;
 
-      --status-green: #10b981;
-      --status-green-soft: rgba(16, 185, 129, 0.14);
-      --status-amber: #f59e0b;
-      --status-amber-soft: rgba(245, 158, 11, 0.15);
-      --status-red: #ef4444;
-      --status-red-soft: rgba(239, 68, 68, 0.14);
+      --hairline: rgba(0, 0, 0, 0.06);
+      --hairline-strong: rgba(0, 0, 0, 0.12);
 
-      /* 餐別柔和標籤色 */
-      --meal-breakfast-bg: #fef3c7;
-      --meal-breakfast-fg: #b45309;
-      --meal-lunch-bg: #dcfce7;
-      --meal-lunch-fg: #15803d;
-      --meal-dinner-bg: #dbeafe;
-      --meal-dinner-fg: #1d4ed8;
-      --meal-snack-bg: #f3e8ff;
-      --meal-snack-fg: #7e22ce;
+      /* 低飽和度語意色 */
+      --accent-cal: #2563EB;
+      --accent-cal-soft: rgba(37, 99, 235, 0.10);
+      --accent-pro: #10B981;
+      --accent-pro-ink: #059669;
+      --accent-pro-soft: rgba(16, 185, 129, 0.12);
+      --accent-warn: #D97706;
+      --accent-warn-soft: rgba(217, 119, 6, 0.12);
+      --accent-over: #E11D48;
+      --accent-over-soft: rgba(225, 29, 72, 0.11);
 
-      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
-      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
-      --radius-lg: 16px;
-      --radius-md: 12px;
-      --radius-sm: 8px;
+      --shadow-card: 0 2px 10px rgba(17, 19, 21, 0.035), 0 1px 2px rgba(17, 19, 21, 0.025);
+      --shadow-sheet: 0 -10px 36px rgba(0, 0, 0, 0.14);
+
+      --radius-hero: 22px;
+      --radius-tile: 16px;
+      --radius-input: 12px;
+      --radius-pill: 999px;
+
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     [data-theme="dark"] {
-      --bg-page: #0b0f19;
-      --bg-card: #151c2c;
-      --bg-subtle: #1e293b;
-      --bg-input: #0f172a;
-      --border-color: #273549;
-      --text-primary: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --text-muted: #64748b;
+      --bg-canvas: #0B0C0E;
+      --bg-card: #15171A;
+      --bg-subtle: #1F2227;
+      --bg-glass: rgba(11, 12, 14, 0.84);
 
-      --accent-blue: #3b82f6;
-      --accent-blue-hover: #60a5fa;
-      --accent-blue-soft: rgba(59, 130, 246, 0.16);
+      --ink-primary: #F3F4F6;
+      --ink-secondary: #9BA1A6;
+      --ink-tertiary: #687076;
 
-      --status-green: #34d399;
-      --status-green-soft: rgba(52, 211, 153, 0.16);
-      --status-amber: #fbbf24;
-      --status-amber-soft: rgba(251, 191, 36, 0.16);
-      --status-red: #f87171;
-      --status-red-soft: rgba(248, 113, 113, 0.16);
+      --hairline: rgba(255, 255, 255, 0.08);
+      --hairline-strong: rgba(255, 255, 255, 0.16);
 
-      --meal-breakfast-bg: rgba(245, 158, 11, 0.2);
-      --meal-breakfast-fg: #fcd34d;
-      --meal-lunch-bg: rgba(16, 185, 129, 0.2);
-      --meal-lunch-fg: #6ee7b7;
-      --meal-dinner-bg: rgba(59, 130, 246, 0.2);
-      --meal-dinner-fg: #93c5fd;
-      --meal-snack-bg: rgba(168, 85, 247, 0.2);
-      --meal-snack-fg: #d8b4fe;
+      --accent-cal: #3B82F6;
+      --accent-cal-soft: rgba(59, 130, 246, 0.16);
+      --accent-pro: #34D399;
+      --accent-pro-ink: #34D399;
+      --accent-pro-soft: rgba(52, 211, 153, 0.15);
+      --accent-warn: #FBBF24;
+      --accent-warn-soft: rgba(251, 191, 36, 0.16);
+      --accent-over: #FB7185;
+      --accent-over-soft: rgba(251, 113, 133, 0.16);
 
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-      --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.4);
+      --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.42);
+      --shadow-sheet: 0 -10px 40px rgba(0, 0, 0, 0.72);
     }
 
     /* ==========================================================================
-       2. 基礎重置與全域排版 (防橫向捲動、手機單手操作最佳化)
+       2. 全域重置與 iPhone 17 Pro Max Mobile-First 基礎規範
        ========================================================================== */
-    * {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -94,21 +90,17 @@
       width: 100%;
       max-width: 100%;
       overflow-x: hidden;
-      background-color: var(--bg-page);
-      color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      line-height: 1.5;
-      transition: background-color 0.2s ease, color 0.2s ease;
+      background-color: var(--bg-canvas);
+      color: var(--ink-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans TC", sans-serif;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    .app-container {
-      width: 100%;
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 12px 14px 96px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    .tabular {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum";
     }
 
     button, input, select {
@@ -117,164 +109,128 @@
     }
 
     button {
-      cursor: pointer;
       border: none;
       background: none;
-      min-height: 44px; /* 確保手指點擊熱區充足 */
-      transition: transform 0.1s ease, background-color 0.15s ease, opacity 0.15s ease;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
     }
 
     button:active {
       transform: scale(0.97);
     }
 
-    .card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      gap: 8px;
-    }
-
-    .section-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .badge-hint {
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: var(--bg-subtle);
-      color: var(--text-secondary);
-    }
-
     /* ==========================================================================
-       3. 頂部導航與日期控制列
+       3. 頂部毛玻璃導航列 (Sticky Glass Header + Safe Area Top)
        ========================================================================== */
-    .top-bar {
+    .glass-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background-color: var(--bg-glass);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--hairline);
+      padding: max(12px, var(--safe-top)) 16px 10px;
+    }
+
+    .header-inner {
+      max-width: 560px;
+      margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
     }
 
-    .brand-box {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .brand-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      display: flex;
+    .date-stepper-group {
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
-    }
-
-    .backup-status {
-      font-size: 0.74rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 2px;
-    }
-
-    .backup-status.warning {
-      color: var(--status-amber);
-      font-weight: 600;
-    }
-
-    .icon-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .icon-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: var(--radius-md);
       background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      padding: 3px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      min-width: 0;
+    }
+
+    .step-arrow-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: var(--text-secondary);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .icon-btn:hover {
-      background-color: var(--bg-subtle);
-      color: var(--text-primary);
-    }
-
-    /* 日期導航列 */
-    .date-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 4px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .date-nav-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-primary);
+      color: var(--ink-secondary);
+      font-size: 1.05rem;
       font-weight: 700;
+      flex-shrink: 0;
     }
 
-    .date-nav-btn:hover {
+    .step-arrow-btn:hover {
       background-color: var(--bg-subtle);
+      color: var(--ink-primary);
     }
 
-    .date-center {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      position: relative;
-    }
-
-    .date-display-btn {
-      font-size: 0.96rem;
+    .date-trigger-btn {
+      padding: 0 10px;
+      height: 34px;
+      font-size: 0.88rem;
       font-weight: 700;
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      display: flex;
+      letter-spacing: -0.01em;
+      color: var(--ink-primary);
+      display: inline-flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
 
-    .date-display-btn:hover {
-      background-color: var(--bg-subtle);
+    .day-rel-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-cal-soft);
+      color: var(--accent-cal);
     }
 
-    .hidden-date-input {
+    .jump-today-btn {
+      height: 32px;
+      padding: 0 10px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-card);
+      border: 1px solid var(--hairline);
+      color: var(--accent-cal);
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .header-right-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .nav-pill-btn {
+      height: 40px;
+      padding: 0 13px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-card);
+      border: 1px solid var(--hairline);
+      color: var(--ink-primary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      white-space: nowrap;
+    }
+
+    .hidden-native-date {
       position: absolute;
       opacity: 0;
       width: 1px;
@@ -282,739 +238,793 @@
       pointer-events: none;
     }
 
-    .today-pill {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      min-height: 30px;
-      border-radius: 999px;
-      background-color: var(--accent-blue-soft);
-      color: var(--accent-blue);
-    }
-
     /* ==========================================================================
-       4. 頂部即時預算儀表板 (剩餘額度制)
+       4. 主版面容器與非對稱 Bento Grid 儀表板
        ========================================================================== */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    @media (max-width: 380px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .metric-card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 14px;
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .metric-label {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .metric-main {
-      font-size: 1.38rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-    }
-
-    .metric-main.status-normal { color: var(--text-primary); }
-    .metric-main.status-warn { color: var(--status-amber); }
-    .metric-main.status-danger { color: var(--status-red); }
-    .metric-main.status-success { color: var(--status-green); }
-
-    .progress-track {
-      width: 100%;
-      height: 8px;
-      background-color: var(--bg-subtle);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease;
-    }
-
-    .fill-blue { background-color: var(--accent-blue); }
-    .fill-amber { background-color: var(--status-amber); }
-    .fill-red { background-color: var(--status-red); }
-    .fill-green { background-color: var(--status-green); }
-
-    .metric-sub {
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      display: flex;
-      justify-content: space-between;
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* ==========================================================================
-       5. 三層速度飲食輸入區
-       ========================================================================== */
-    /* 第二層：份量倍率與快捷餐別選擇器 (Segmented Control) */
-    .quick-controls-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .portion-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      background-color: var(--bg-subtle);
-      padding: 4px;
-      border-radius: var(--radius-md);
-    }
-
-    .portion-label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text-secondary);
-      padding-left: 8px;
-      white-space: nowrap;
-    }
-
-    .portion-group {
-      display: flex;
-      flex: 1;
-      gap: 4px;
-    }
-
-    .portion-btn,
-    .quick-meal-btn {
-      flex: 1;
-      min-height: 36px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      padding: 0 4px;
-      white-space: nowrap;
-    }
-
-    .portion-btn.active,
-    .quick-meal-btn.active {
-      background-color: var(--bg-card);
-      color: var(--accent-blue);
-      box-shadow: var(--shadow-sm);
-    }
-
-    /* 水平滑動分類標籤頁 (Category Tabs) */
-    .category-tabs {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 6px;
-      margin-bottom: 10px;
-      scrollbar-width: none; /* Firefox 隱藏捲軸 */
-      -ms-overflow-style: none;
-    }
-
-    .category-tabs::-webkit-scrollbar {
-      display: none; /* Chrome / Safari 隱藏捲軸 */
-    }
-
-    .cat-tab {
-      min-height: 36px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-input);
-      color: var(--text-secondary);
-      font-size: 0.82rem;
-      font-weight: 700;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .cat-tab:hover {
-      border-color: var(--accent-blue);
-      color: var(--text-primary);
-    }
-
-    .cat-tab.active {
-      background-color: var(--accent-blue);
-      border-color: var(--accent-blue);
-      color: #ffffff;
-    }
-
-    /* 第一層：一鍵快捷網格 */
-    .preset-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    .preset-btn {
-      background-color: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 4px;
-      min-height: 64px;
-    }
-
-    .preset-btn:hover {
-      border-color: var(--accent-blue);
-      background-color: var(--accent-blue-soft);
-    }
-
-    .preset-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 4px;
-    }
-
-    .preset-cat-badge {
-      font-size: 0.66rem;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 5px;
-      background-color: var(--bg-subtle);
-      color: var(--text-secondary);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .preset-name {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.3;
-    }
-
-    .preset-macros {
-      font-size: 0.76rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .preset-macros span.p-highlight {
-      color: var(--accent-blue);
-      font-weight: 700;
-    }
-
-    .manage-toggle-btn {
-      font-size: 0.78rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      min-height: 32px;
-      border-radius: var(--radius-sm);
-      background-color: var(--bg-subtle);
-      color: var(--text-secondary);
-    }
-
-    .manage-toggle-btn.active {
-      background-color: var(--accent-blue);
-      color: #ffffff;
-    }
-
-    /* 管理快捷模式清單 */
-    .manage-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .manage-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 8px 10px;
-      background-color: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-    }
-
-    .manage-item-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .manage-item-title {
-      font-size: 0.86rem;
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .manage-item-sub {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-
-    .manage-item-actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .mini-icon-btn {
-      width: 36px;
-      height: 36px;
-      min-height: 36px;
-      border-radius: var(--radius-sm);
-      background-color: var(--bg-subtle);
-      color: var(--text-secondary);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 700;
-    }
-
-    .mini-icon-btn.danger {
-      color: var(--status-red);
-      background-color: var(--status-red-soft);
-    }
-
-    /* 第三層：外食手動快速輸入表單 */
-    .manual-form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .form-row-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .input-group label {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--text-secondary);
-    }
-
-    .form-control {
-      width: 100%;
-      min-height: 44px;
-      padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-input);
-      font-size: 0.92rem;
-      outline: none;
-      transition: border-color 0.15s ease;
-    }
-
-    .form-control:focus {
-      border-color: var(--accent-blue);
-    }
-
-    .meal-selector {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-    }
-
-    .meal-chip {
-      min-height: 40px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-input);
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-secondary);
-    }
-
-    .meal-chip.active {
-      border-color: var(--accent-blue);
-      background-color: var(--accent-blue-soft);
-      color: var(--accent-blue);
-    }
-
-    .primary-submit-btn {
-      width: 100%;
-      min-height: 46px;
-      border-radius: var(--radius-md);
-      background-color: var(--accent-blue);
-      color: #ffffff;
-      font-size: 0.95rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .primary-submit-btn:hover {
-      background-color: var(--accent-blue-hover);
-    }
-
-    /* ==========================================================================
-       6. 當日時間軸明細
-       ========================================================================== */
-    .timeline-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 28px 16px;
-      color: var(--text-muted);
-      font-size: 0.86rem;
-      background-color: var(--bg-input);
-      border-radius: var(--radius-md);
-      border: 1px dashed var(--border-color);
-    }
-
-    .log-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      background-color: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-    }
-
-    .log-main {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .log-top-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .meal-tag {
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 6px;
-      white-space: nowrap;
-    }
-
-    .meal-tag.早餐 { background: var(--meal-breakfast-bg); color: var(--meal-breakfast-fg); }
-    .meal-tag.午餐 { background: var(--meal-lunch-bg); color: var(--meal-lunch-fg); }
-    .meal-tag.晚餐 { background: var(--meal-dinner-bg); color: var(--meal-dinner-fg); }
-    .meal-tag.點心 { background: var(--meal-snack-bg); color: var(--meal-snack-fg); }
-
-    .cat-tag {
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 6px;
-      background-color: var(--bg-subtle);
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
-
-    .log-time {
-      font-size: 0.74rem;
-      color: var(--text-muted);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .log-name {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .log-macros {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .log-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .repeat-btn {
-      min-height: 38px;
-      padding: 0 10px;
-      border-radius: var(--radius-sm);
-      background-color: var(--accent-blue-soft);
-      color: var(--accent-blue);
-      font-size: 0.78rem;
-      font-weight: 800;
-    }
-
-    .delete-btn {
-      width: 38px;
-      height: 38px;
-      min-height: 38px;
-      border-radius: var(--radius-sm);
-      background-color: var(--bg-subtle);
-      color: var(--text-secondary);
-      font-size: 1.05rem;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .delete-btn:hover {
-      background-color: var(--status-red-soft);
-      color: var(--status-red);
-    }
-
-    /* ==========================================================================
-       7. 跨裝置與筆記整合 (資料管理區)
-       ========================================================================== */
-    .data-actions-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-
-    .secondary-btn {
-      width: 100%;
-      min-height: 44px;
-      padding: 0 14px;
-      border-radius: var(--radius-md);
-      background-color: var(--bg-subtle);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      font-size: 0.86rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .secondary-btn:hover {
-      border-color: var(--accent-blue);
-    }
-
-    .backup-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    /* ==========================================================================
-       8. 彈窗 (Modal) 與 底部復原提示條 (Toast Undo)
-       ========================================================================== */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(2px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 100;
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .modal-box {
-      width: 100%;
-      max-width: 420px;
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      box-shadow: var(--shadow-md);
+    .main-viewport {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 14px 16px calc(var(--safe-bottom) + 92px);
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
 
-    .modal-header {
+    .bento-surface {
+      background-color: var(--bg-card);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-hero);
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    /* --- 4.1 Hero Bento 區域 --- */
+    .bento-dashboard-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* 全寬主熱量卡 */
+    .hero-cal-card {
+      padding: 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
     }
 
-    .modal-title {
-      font-size: 1.05rem;
+    .hero-cal-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hero-eyebrow-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--ink-secondary);
+    }
+
+    .cal-status-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-cal-soft);
+      color: var(--accent-cal);
+    }
+
+    .cal-status-pill.warn {
+      background-color: var(--accent-warn-soft);
+      color: var(--accent-warn);
+    }
+
+    .cal-status-pill.over {
+      background-color: var(--accent-over-soft);
+      color: var(--accent-over);
+    }
+
+    .hero-remaining-num {
+      font-size: 2.625rem; /* 42px */
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.04;
+      color: var(--ink-primary);
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .hero-remaining-num.is-over {
+      color: var(--accent-over);
+    }
+
+    .hero-kcal-unit {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--ink-secondary);
+      letter-spacing: 0;
+    }
+
+    .hero-ratio-line {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: var(--ink-secondary);
+    }
+
+    .hero-ratio-line strong {
+      color: var(--ink-primary);
+      font-weight: 700;
+    }
+
+    /* 108px SVG 環形進度圖 */
+    .hero-ring-box {
+      width: 108px;
+      height: 108px;
+      flex-shrink: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-ring-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg-track {
+      fill: none;
+      stroke: var(--bg-subtle);
+      stroke-width: 10;
+    }
+
+    .ring-fg-arc {
+      fill: none;
+      stroke: var(--accent-cal);
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.55s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.25s ease;
+    }
+
+    .ring-center-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .ring-pct-main {
+      font-size: 1.28rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--ink-primary);
+    }
+
+    .ring-sub-txt {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: var(--ink-tertiary);
+      margin-top: 2px;
+    }
+
+    /* 次級 60% / 40% 非對稱分割列 */
+    .asymmetric-split-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr; /* 60% / 40% */
+      gap: 12px;
+    }
+
+    @media (max-width: 350px) {
+      .asymmetric-split-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 左側 60% 蛋白質達成率卡片 */
+    .protein-focus-card {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .bento-sub-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .bento-sub-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .pro-indicator-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--accent-pro);
+    }
+
+    .pro-pct-chip {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-pro-soft);
+      color: var(--accent-pro-ink);
+    }
+
+    .pro-big-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .pro-grams-val {
+      font-size: 1.75rem; /* 28px */
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.08;
+      color: var(--ink-primary);
+    }
+
+    .pro-grams-goal {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--ink-secondary);
+    }
+
+    .pro-bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-subtle);
+      overflow: hidden;
+    }
+
+    .pro-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-pro);
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .pro-remain-caption {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ink-secondary);
+    }
+
+    .pro-remain-caption.hit {
+      color: var(--accent-pro-ink);
+    }
+
+    /* 右側 40% 近 7 日熱量趨勢 Sparkline 卡片 */
+    .sparkline-card {
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .spark-avg-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--ink-tertiary);
+    }
+
+    .spark-canvas-wrap {
+      width: 100%;
+      height: 68px;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .spark-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .spark-axis-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--ink-tertiary);
+      padding: 0 2px;
+    }
+
+    .spark-axis-labels span.active-day {
+      color: var(--accent-cal);
       font-weight: 800;
     }
 
-    .modal-footer {
+    /* ==========================================================================
+       5. 單手一鍵快捷記錄 Bento 模組
+       ========================================================================== */
+    .module-header-row {
       display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 8px;
-      margin-top: 4px;
+      margin-bottom: 12px;
     }
 
-    /* Toast 浮動提示與復原條 */
-    .toast-container {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 28px);
-      max-width: 460px;
-      z-index: 200;
-      pointer-events: none;
+    .module-title {
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--ink-primary);
+      white-space: nowrap;
+    }
+
+    .meal-pills-bar {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background-color: var(--bg-subtle);
+      padding: 3px;
+      border-radius: var(--radius-pill);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .meal-pills-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .meal-selector-pill {
+      height: 28px;
+      padding: 0 10px;
+      border-radius: var(--radius-pill);
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--ink-secondary);
+      white-space: nowrap;
+    }
+
+    .meal-selector-pill.active {
+      background-color: var(--bg-card);
+      color: var(--ink-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    /* 水平可捲動分類膠囊 */
+    .category-chips-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .category-chips-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-pill-btn {
+      height: 32px;
+      padding: 0 13px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-subtle);
+      color: var(--ink-secondary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .cat-pill-btn.active {
+      background-color: var(--ink-primary);
+      color: var(--bg-card);
+    }
+
+    /* 2 欄 Bento 食物快捷卡片網格 */
+    .bento-food-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+    }
+
+    .quick-food-card {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-tile);
+      padding: 12px;
+      min-height: 76px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .quick-food-card:hover {
+      border-color: var(--hairline-strong);
+    }
+
+    .quick-food-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .quick-food-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      line-height: 1.32;
+      word-break: break-word;
+    }
+
+    .quick-cat-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background-color: var(--bg-card);
+      color: var(--ink-tertiary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .quick-food-macros {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--ink-secondary);
+    }
+
+    .pro-macro-highlight {
+      color: var(--accent-pro-ink);
+      font-weight: 700;
+    }
+
+    /* 精簡行內手動輸入區 (+ 存為常用快捷開關) */
+    .manual-inline-divider {
+      height: 1px;
+      background-color: var(--hairline);
+      margin: 14px 0 12px;
+    }
+
+    .manual-sub-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .manual-sub-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--ink-secondary);
+    }
+
+    .save-preset-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-subtle);
+      color: var(--ink-secondary);
+    }
+
+    .save-preset-toggle.checked {
+      background-color: var(--accent-cal-soft);
+      color: var(--accent-cal);
+    }
+
+    .manual-grid-form {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .toast {
-      pointer-events: auto;
-      background-color: #1e293b;
-      color: #f8fafc;
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-md);
+    .manual-fields-row {
+      display: grid;
+      grid-template-columns: 1.4fr 0.85fr 0.85fr;
+      gap: 8px;
+    }
+
+    @media (max-width: 420px) {
+      .manual-fields-row {
+        grid-template-columns: 1fr 1fr;
+      }
+      .manual-fields-row .field-full-mobile {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .clean-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 12px;
+      border-radius: var(--radius-input);
+      border: 1px solid var(--hairline);
+      background-color: var(--bg-subtle);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--ink-primary);
+      outline: none;
+    }
+
+    .clean-input::placeholder {
+      color: var(--ink-tertiary);
+    }
+
+    .clean-input:focus {
+      border-color: var(--accent-cal);
+      background-color: var(--bg-card);
+    }
+
+    .primary-action-btn {
+      width: 100%;
+      height: 46px;
+      border-radius: var(--radius-input);
+      background-color: var(--accent-cal);
+      color: #FFFFFF;
+      font-size: 0.92rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      animation: slideUp 0.2s ease-out;
-    }
-
-    [data-theme="dark"] .toast {
-      background-color: #334155;
-      border: 1px solid #475569;
-    }
-
-    .toast-undo-btn {
-      min-height: 32px;
-      padding: 4px 12px;
-      border-radius: var(--radius-sm);
-      background-color: var(--accent-blue);
-      color: #ffffff;
-      font-size: 0.82rem;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
+      justify-content: center;
+      gap: 6px;
     }
 
     /* ==========================================================================
-       9. 月曆總覽視窗樣式 (v5 新增)
+       6. 分餐時間軸明細 (Grouped Daily Timeline Log)
        ========================================================================== */
-    .header-pill-btn {
-      height: 44px;
-      padding: 0 12px;
-      border-radius: var(--radius-md);
+    .timeline-groups-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .meal-section-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .meal-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink-secondary);
+    }
+
+    .meal-section-sum {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ink-tertiary);
+    }
+
+    .meal-items-card {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-tile);
+      overflow: hidden;
+    }
+
+    .timeline-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 14px;
       background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
+    }
+
+    .timeline-row + .timeline-row {
+      border-top: 1px solid var(--hairline);
+    }
+
+    .timeline-row-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .timeline-item-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      word-break: break-word;
+    }
+
+    .timeline-item-meta {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--ink-secondary);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .timeline-row-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .dup-plus-btn {
+      height: 32px;
+      padding: 0 10px;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-cal-soft);
+      color: var(--accent-cal);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .del-cross-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--bg-subtle);
+      color: var(--ink-secondary);
+      font-size: 0.95rem;
+      font-weight: 700;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+    }
+
+    .del-cross-btn:hover {
+      background-color: var(--accent-over-soft);
+      color: var(--accent-over);
+    }
+
+    .empty-timeline-box {
+      text-align: center;
+      padding: 26px 16px;
       font-size: 0.84rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      box-shadow: var(--shadow-sm);
-      white-space: nowrap;
-    }
-
-    .header-pill-btn:hover {
+      color: var(--ink-tertiary);
       background-color: var(--bg-subtle);
-      border-color: var(--accent-blue);
+      border-radius: var(--radius-tile);
     }
 
-    .calendar-modal-box {
-      max-width: 480px;
-      padding: 16px;
-      gap: 12px;
+    /* ==========================================================================
+       7. iOS Bottom Sheet 彈窗 (月曆總覽 & 設定/菜單/備份)
+       ========================================================================== */
+    .bottom-sheet-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background-color: rgba(0, 0, 0, 0.46);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
     }
 
-    .cal-month-nav {
+    @media (min-width: 560px) {
+      .bottom-sheet-mask {
+        align-items: center;
+        padding: 20px;
+      }
+    }
+
+    .bottom-sheet-mask.open {
+      display: flex;
+      animation: fadeMask 0.18s ease-out;
+    }
+
+    .bottom-sheet-card {
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background-color: var(--bg-card);
+      border-top-left-radius: 26px;
+      border-top-right-radius: 26px;
+      padding: 12px 20px max(20px, var(--safe-bottom));
+      box-shadow: var(--shadow-sheet);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: slideSheet 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @media (min-width: 560px) {
+      .bottom-sheet-card {
+        border-radius: 24px;
+        padding: 22px;
+      }
+    }
+
+    .sheet-handle {
+      width: 36px;
+      height: 5px;
+      border-radius: 999px;
+      background-color: var(--bg-subtle);
+      margin: 0 auto 2px;
+    }
+
+    .sheet-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sheet-heading {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .sheet-dismiss-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--bg-subtle);
+      color: var(--ink-secondary);
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 月曆樣式 */
+    .cal-month-switcher {
       display: flex;
       align-items: center;
       justify-content: space-between;
       background-color: var(--bg-subtle);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-input);
       padding: 4px;
     }
 
-    .cal-month-title {
-      font-size: 0.96rem;
+    .cal-month-text {
+      font-size: 0.95rem;
       font-weight: 800;
-      letter-spacing: 0.02em;
     }
 
-    .cal-summary-bar {
+    .cal-summary-trio {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
     }
 
     .cal-stat-box {
-      background-color: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+      background-color: var(--bg-subtle);
+      border-radius: var(--radius-input);
+      padding: 10px 8px;
+      text-align: center;
     }
 
-    .cal-stat-label {
-      font-size: 0.72rem;
+    .cal-stat-lbl {
+      font-size: 0.68rem;
       font-weight: 600;
-      color: var(--text-secondary);
+      color: var(--ink-secondary);
     }
 
-    .cal-stat-val {
-      font-size: 0.96rem;
+    .cal-stat-num {
+      font-size: 0.94rem;
       font-weight: 800;
-      color: var(--text-primary);
-      font-variant-numeric: tabular-nums;
+      color: var(--ink-primary);
+      margin-top: 2px;
     }
 
     .cal-weekdays {
@@ -1023,89 +1033,71 @@
       text-align: center;
       font-size: 0.72rem;
       font-weight: 700;
-      color: var(--text-muted);
-      padding-bottom: 2px;
+      color: var(--ink-tertiary);
     }
 
-    .cal-grid {
+    .cal-matrix {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
+      gap: 5px;
     }
 
     .cal-cell {
-      min-height: 62px;
+      min-height: 60px;
       padding: 5px 2px;
-      border-radius: var(--radius-sm);
-      background-color: var(--bg-input);
-      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      background-color: var(--bg-subtle);
+      border: 1px solid transparent;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
       gap: 2px;
-      text-align: center;
-      font-variant-numeric: tabular-nums;
     }
 
-    .cal-cell:hover {
-      border-color: var(--accent-blue);
-      background-color: var(--accent-blue-soft);
-    }
-
-    .cal-cell.empty {
+    .cal-cell.blank {
       background: transparent;
-      border-color: transparent;
       pointer-events: none;
     }
 
-    .cal-cell.is-today {
-      border-color: var(--accent-blue);
-      box-shadow: inset 0 0 0 1px var(--accent-blue);
+    .cal-cell.today-ring {
+      border-color: var(--accent-cal);
     }
 
-    .cal-cell.is-selected {
-      background-color: var(--accent-blue-soft);
-      border-color: var(--accent-blue);
+    .cal-cell.selected-day {
+      background-color: var(--accent-cal-soft);
+      border-color: var(--accent-cal);
     }
 
     .cal-day-top {
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 3px;
-      width: 100%;
-    }
-
-    .cal-day-num {
       font-size: 0.78rem;
       font-weight: 800;
-      color: var(--text-primary);
-      line-height: 1.1;
     }
 
     .cal-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      flex-shrink: 0;
     }
 
-    .cal-dot.green { background-color: var(--status-green); }
-    .cal-dot.red { background-color: var(--status-red); }
-    .cal-dot.blue { background-color: var(--accent-blue); }
+    .cal-dot.emerald { background-color: var(--accent-pro); }
+    .cal-dot.blue { background-color: var(--accent-cal); }
+    .cal-dot.rose { background-color: var(--accent-over); }
 
-    .cal-kcal {
-      font-size: 0.68rem;
+    .cal-cell-cal {
+      font-size: 0.67rem;
       font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.15;
+      color: var(--ink-primary);
+      line-height: 1.1;
     }
 
-    .cal-protein {
-      font-size: 0.64rem;
+    .cal-cell-pro {
+      font-size: 0.62rem;
       font-weight: 600;
-      color: var(--text-secondary);
+      color: var(--ink-secondary);
       line-height: 1.1;
     }
 
@@ -1116,8 +1108,7 @@
       flex-wrap: wrap;
       gap: 12px;
       font-size: 0.72rem;
-      color: var(--text-secondary);
-      padding-top: 2px;
+      color: var(--ink-secondary);
     }
 
     .cal-legend-item {
@@ -1125,618 +1116,568 @@
       align-items: center;
       gap: 4px;
     }
+
+    /* 設定 Sheet 內部組件 */
+    .setting-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .setting-block-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink-secondary);
+    }
+
+    .theme-seg-control {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background-color: var(--bg-subtle);
+      padding: 3px;
+      border-radius: var(--radius-input);
+      gap: 3px;
+    }
+
+    .theme-seg-btn {
+      height: 34px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink-secondary);
+    }
+
+    .theme-seg-btn.active {
+      background-color: var(--bg-card);
+      color: var(--ink-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .grid-2-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .input-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-stack label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--ink-secondary);
+    }
+
+    .preset-scroll-box {
+      max-height: 170px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .preset-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      background-color: var(--bg-subtle);
+      border-radius: 10px;
+      font-size: 0.82rem;
+    }
+
+    .secondary-btn {
+      height: 42px;
+      padding: 0 14px;
+      border-radius: var(--radius-input);
+      background-color: var(--bg-subtle);
+      color: var(--ink-primary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .backup-hint-box {
+      font-size: 0.74rem;
+      color: var(--ink-tertiary);
+      line-height: 1.45;
+      background-color: var(--bg-subtle);
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+
+    /* ==========================================================================
+       8. iOS 底部浮動 Toast + Undo 復原提示
+       ========================================================================== */
+    .floating-toast-area {
+      position: fixed;
+      left: 50%;
+      bottom: max(18px, calc(var(--safe-bottom) + 12px));
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 440px;
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    .toast-banner {
+      pointer-events: auto;
+      background-color: rgba(17, 19, 21, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #F3F4F6;
+      padding: 12px 16px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      animation: toastUp 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-theme="dark"] .toast-banner {
+      background-color: rgba(31, 34, 39, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .toast-undo-btn {
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      background-color: var(--accent-cal);
+      color: #FFFFFF;
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    @keyframes fadeMask {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideSheet {
+      from { transform: translateY(24px); opacity: 0.6; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes toastUp {
+      from { transform: translateY(12px) scale(0.96); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
-  <div class="app-container">
-    <!-- 1. 頂部導航與日期控制列 -->
-    <header class="top-bar">
-      <div class="brand-box">
-        <div class="brand-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-blue);">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          </svg>
-          Pure Nutrition Tracker
+  <!-- 1. 頂部毛玻璃導航列 -->
+  <header class="glass-header">
+    <div class="header-inner">
+      <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+        <div class="date-stepper-group" role="group" aria-label="日期切換">
+          <button type="button" id="prevDayBtn" class="step-arrow-btn" aria-label="前一天">‹</button>
+          <button type="button" id="datePickerBtn" class="date-trigger-btn" aria-label="選擇日期">
+            <span id="headerDateText">11/27</span>
+            <span id="headerRelBadge" class="day-rel-badge">今天</span>
+          </button>
+          <input type="date" id="nativeDateInput" class="hidden-native-date" aria-label="選擇日期" />
+          <button type="button" id="nextDayBtn" class="step-arrow-btn" aria-label="後一天">›</button>
         </div>
-        <div id="backupStatusText" class="backup-status">本機離線儲存就緒</div>
+        <button type="button" id="jumpTodayBtn" class="jump-today-btn" style="display: none;">回今天</button>
       </div>
 
-      <div class="icon-actions">
-        <button id="openCalendarBtn" class="header-pill-btn" title="月曆熱量總覽" aria-label="月曆熱量總覽">
+      <div class="header-right-actions">
+        <button type="button" id="openCalBtn" class="nav-pill-btn" aria-label="月曆總覽">
           <span>📅</span>
           <span>月曆</span>
         </button>
-        <button id="themeToggleBtn" class="icon-btn" title="切換深色／淺色模式" aria-label="切換深色／淺色模式">
-          <!-- 由 JS 動態填入太陽或月亮 SVG -->
+        <button type="button" id="openSettingsBtn" class="nav-pill-btn" aria-label="設定與備份">
+          <span>⚙️</span>
+          <span>設定</span>
         </button>
-        <button id="openSettingsBtn" class="icon-btn" title="每日目標設定" aria-label="每日目標設定">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. 主畫面内容區 -->
+  <main class="main-viewport">
+    <!-- Section 1: 非對稱 Bento Grid 健康儀表板 -->
+    <section class="bento-dashboard-stack" aria-label="每日營養儀表板">
+      <!-- 全寬主熱量指揮卡 -->
+      <div class="bento-surface hero-cal-card">
+        <div class="hero-cal-info">
+          <div class="hero-eyebrow-row">
+            <span id="heroCalLabel">剩餘可攝取</span>
+            <span id="heroCalBadge" class="cal-status-pill">尚可攝取</span>
+          </div>
+          <div id="heroCalBigNum" class="hero-remaining-num tabular">
+            1,900 <span class="hero-kcal-unit">kcal</span>
+          </div>
+          <div class="hero-ratio-line tabular">
+            <span>已攝取 <strong id="heroConsumedNum">0</strong></span>
+            <span>/</span>
+            <span>目標 <strong id="heroGoalNum">1,900</strong> kcal</span>
+          </div>
+        </div>
+
+        <!-- 108px SVG 環形進度圖 -->
+        <div class="hero-ring-box" aria-hidden="true">
+          <svg class="hero-ring-svg" viewBox="0 0 108 108">
+            <circle class="ring-bg-track" cx="54" cy="54" r="44"></circle>
+            <circle id="heroRingArc" class="ring-fg-arc" cx="54" cy="54" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
           </svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- 日期切換導航 -->
-    <nav class="date-nav" aria-label="日期導航">
-      <button id="prevDayBtn" class="date-nav-btn" title="前一天" aria-label="前一天">&lt;</button>
-      <div class="date-center">
-        <button id="dateDisplayBtn" class="date-display-btn" title="選擇日期">
-          <span id="dateDisplayText">今日</span>
-        </button>
-        <input type="date" id="datePickerInput" class="hidden-date-input" aria-label="選擇特定日期" />
-        <button id="backToTodayBtn" class="today-pill" style="display: none;">回到今日</button>
-      </div>
-      <button id="nextDayBtn" class="date-nav-btn" title="後一天" aria-label="後一天">&gt;</button>
-    </nav>
-
-    <!-- 2. 頂部即時預算儀表板（剩餘額度制） -->
-    <section class="dashboard-grid" aria-label="今日營養預算儀表板">
-      <!-- 剩餘可用熱量卡片 -->
-      <div class="metric-card">
-        <div class="metric-label">
-          <span>可用熱量預算</span>
-          <span id="kcalPercentBadge">0%</span>
-        </div>
-        <div id="kcalRemainingText" class="metric-main status-normal">剩餘 2000 kcal</div>
-        <div class="progress-track">
-          <div id="kcalProgressBar" class="progress-fill fill-blue"></div>
-        </div>
-        <div class="metric-sub">
-          <span>已攝取 <strong id="kcalConsumedText">0</strong></span>
-          <span>上限 <span id="kcalTargetText">2000</span> kcal</span>
+          <div class="ring-center-overlay">
+            <span id="heroRingPct" class="ring-pct-main tabular">0%</span>
+            <span class="ring-sub-txt">熱量達成</span>
+          </div>
         </div>
       </div>
 
-      <!-- 蛋白質目標卡片 -->
-      <div class="metric-card">
-        <div class="metric-label">
-          <span>蛋白質目標進度</span>
-          <span id="proteinPercentBadge">0%</span>
+      <!-- 次級 60% / 40% 非對稱分割列 -->
+      <div class="asymmetric-split-row">
+        <!-- 左側 60%: 蛋白質達成率卡片 -->
+        <div class="bento-surface protein-focus-card">
+          <div class="bento-sub-header">
+            <span class="bento-sub-title"><i class="pro-indicator-dot"></i>蛋白質達成率</span>
+            <span id="proPctChip" class="pro-pct-chip tabular">0%</span>
+          </div>
+          <div class="pro-big-row tabular">
+            <span id="proCurrentNum" class="pro-grams-val">0</span>
+            <span class="pro-grams-goal">/ <span id="proGoalNum">100</span>g</span>
+          </div>
+          <div class="pro-bar-track">
+            <div id="proBarFill" class="pro-bar-fill"></div>
+          </div>
+          <div id="proRemainText" class="pro-remain-caption tabular">還差 100g 達標</div>
         </div>
-        <div id="proteinRemainingText" class="metric-main status-normal">還差 110 g</div>
-        <div class="progress-track">
-          <div id="proteinProgressBar" class="progress-fill fill-blue"></div>
-        </div>
-        <div class="metric-sub">
-          <span>已攝取 <strong id="proteinConsumedText">0</strong></span>
-          <span>目標 <span id="proteinTargetText">110</span> g</span>
+
+        <!-- 右側 40%: 近 7 日熱量趨勢微圖表 -->
+        <div class="bento-surface sparkline-card">
+          <div class="bento-sub-header">
+            <span class="bento-sub-title">7日趨勢</span>
+            <span id="sparkAvgLabel" class="spark-avg-label tabular">均 0</span>
+          </div>
+          <div class="spark-canvas-wrap">
+            <svg id="sparklineSvg" class="spark-svg" viewBox="0 0 140 66" preserveAspectRatio="none"></svg>
+          </div>
+          <div id="sparkAxisRow" class="spark-axis-labels tabular"></div>
         </div>
       </div>
     </section>
 
-    <!-- 3. 第一層 & 第二層：快捷卡片與彈性份量微調 -->
-    <section class="card" aria-label="一鍵快捷與份量微調">
-      <div class="section-header">
-        <div class="section-title">
-          ⚡ 一鍵快捷紀錄
-          <span class="badge-hint">1秒完成</span>
-        </div>
-        <button id="toggleManagePresetsBtn" class="manage-toggle-btn">管理快捷</button>
-      </div>
-
-      <!-- 第二層：彈性份量微調 & 快捷餐別覆寫 -->
-      <div id="portionControlBar" class="quick-controls-wrap">
-        <div class="portion-bar">
-          <span class="portion-label">份量倍率</span>
-          <div class="portion-group" role="group" aria-label="選擇份量倍率">
-            <button type="button" class="portion-btn" data-mult="0.5">0.5 份</button>
-            <button type="button" class="portion-btn active" data-mult="1">1 份</button>
-            <button type="button" class="portion-btn" data-mult="1.5">1.5 份</button>
-            <button type="button" class="portion-btn" data-mult="2">2 份</button>
-          </div>
-        </div>
-
-        <div class="portion-bar" id="quickMealControlBar">
-          <span class="portion-label">記錄餐別</span>
-          <div class="portion-group" role="group" aria-label="選擇快捷記錄餐別">
-            <button type="button" class="quick-meal-btn active" data-qmeal="自動">自動</button>
-            <button type="button" class="quick-meal-btn" data-qmeal="早餐">早餐</button>
-            <button type="button" class="quick-meal-btn" data-qmeal="午餐">午餐</button>
-            <button type="button" class="quick-meal-btn" data-qmeal="晚餐">晚餐</button>
-            <button type="button" class="quick-meal-btn" data-qmeal="點心">點心</button>
-          </div>
+    <!-- Section 2: 單手一鍵快捷記錄 Bento 模組 -->
+    <section class="bento-surface" aria-label="快速記錄餐點">
+      <div class="module-header-row">
+        <h2 class="module-title">快速記錄</h2>
+        <div class="meal-pills-bar" id="mealSelectorStrip" role="group" aria-label="餐別選擇">
+          <button type="button" class="meal-selector-pill active" data-meal="自動">自動</button>
+          <button type="button" class="meal-selector-pill" data-meal="早餐">早餐</button>
+          <button type="button" class="meal-selector-pill" data-meal="午餐">午餐</button>
+          <button type="button" class="meal-selector-pill" data-meal="晚餐">晚餐</button>
+          <button type="button" class="meal-selector-pill" data-meal="點心">點心</button>
         </div>
       </div>
 
-      <!-- 分類標籤頁 (全部 / 超商 / 星巴克 / 速食 / 自訂) -->
-      <div id="categoryTabs" class="category-tabs" role="tablist" aria-label="食物分類篩選"></div>
+      <div id="categoryChipsBar" class="category-chips-row" role="tablist" aria-label="餐點分類"></div>
 
-      <!-- 快捷按鈕網格（一般模式） -->
-      <div id="presetGrid" class="preset-grid"></div>
+      <div id="bentoFoodGrid" class="bento-food-grid"></div>
 
-      <!-- 快捷管理模式（編輯/新增/刪除/上下排序/合併/重置） -->
-      <div id="presetManageArea" style="display: none;">
-        <div id="managePresetList" class="manage-list"></div>
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-          <button id="openAddPresetBtn" class="secondary-btn">
-            ＋ 新增自訂快捷食物
-          </button>
-          <button id="mergeLatestPresetsBtn" class="secondary-btn" style="color: var(--accent-blue); border-color: var(--border-color);">
-            ✨ 合併最新內建菜單（保留自訂項目）
-          </button>
-          <button id="resetDefaultPresetsBtn" class="secondary-btn" style="color: var(--status-amber); border-color: var(--border-color);">
-            ↺ 重置為內建預設菜單庫
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. 第三層：外食手動快速輸入 -->
-    <section class="card" aria-label="外食手動快速輸入">
-      <div class="section-header">
-        <div class="section-title">
-          ✍️ 外食手動輸入
-          <span class="badge-hint">5秒完成</span>
-        </div>
+      <!-- 精簡行內手動輸入 + 存為常用快捷開關 -->
+      <div class="manual-inline-divider"></div>
+      <div class="manual-sub-header">
+        <span class="manual-sub-label" id="manualMealTagHint">手動輸入 · 自動歸類</span>
+        <button type="button" id="saveAsPresetToggle" class="save-preset-toggle" aria-pressed="false">
+          <span>＋ 存為常用快捷</span>
+        </button>
       </div>
 
-      <form id="manualEntryForm" class="manual-form">
-        <div class="input-group">
-          <label for="foodNameInput">餐點名稱（選填，未填自動帶入「外食紀錄」）</label>
-          <input type="text" id="foodNameInput" class="form-control" placeholder="例如：自助餐雞腿便當、牛肉麵..." />
-        </div>
-
-        <div class="form-row-2">
-          <div class="input-group">
-            <label for="foodKcalInput">熱量 (kcal) *</label>
-            <input type="text" id="foodKcalInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="例如：650 或 8.5" required />
+      <form id="quickManualForm" class="manual-grid-form" novalidate>
+        <div class="manual-fields-row">
+          <div class="field-full-mobile">
+            <input type="text" id="manualNameInput" class="clean-input" placeholder="餐點名稱（選填）" aria-label="餐點名稱" />
           </div>
-          <div class="input-group">
-            <label for="foodProteinInput">蛋白質 (g) *</label>
-            <input type="text" id="foodProteinInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="例如：32 或 0.6" required />
-          </div>
+          <input type="text" id="manualCalInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="熱量 kcal" aria-label="熱量 kcal" required />
+          <input type="text" id="manualProInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="蛋白質 g" aria-label="蛋白質 g" required />
         </div>
-
-        <div class="input-group">
-          <label>餐別標籤（已依時段自動選取）</label>
-          <div class="meal-selector" id="mealSelectorGroup">
-            <button type="button" class="meal-chip" data-meal="早餐">早餐</button>
-            <button type="button" class="meal-chip" data-meal="午餐">午餐</button>
-            <button type="button" class="meal-chip" data-meal="晚餐">晚餐</button>
-            <button type="button" class="meal-chip" data-meal="點心">點心</button>
-          </div>
-        </div>
-
-        <button type="submit" class="primary-submit-btn">加入紀錄</button>
+        <button type="submit" class="primary-action-btn">＋ 記錄這筆飲食</button>
       </form>
     </section>
 
-    <!-- 5. 當日時間軸明細與防呆操作 -->
-    <section class="card" aria-label="當日飲食時間軸明細">
-      <div class="section-header">
-        <div class="section-title">
-          📋 當日飲食明細
-          <span id="logCountBadge" class="badge-hint">0 筆</span>
-        </div>
+    <!-- Section 3: 分餐時間軸明細 -->
+    <section class="bento-surface" aria-label="當日飲食明細">
+      <div class="module-header-row">
+        <h2 class="module-title">今日明細</h2>
+        <span id="timelineCountBadge" class="tabular" style="font-size: 0.76rem; font-weight: 700; color: var(--ink-secondary);">0 筆</span>
       </div>
 
-      <div id="timelineList" class="timeline-list"></div>
+      <div id="timelineGroupsContainer" class="timeline-groups-wrap"></div>
     </section>
+  </main>
 
-    <!-- 6. 跨裝置與筆記整合（資料管理區） -->
-    <section class="card" aria-label="筆記摘要與資料備份">
-      <div class="section-header">
-        <div class="section-title">📦 筆記摘要與資料備份</div>
-      </div>
-
-      <div class="data-actions-grid">
-        <button id="copyMarkdownBtn" class="secondary-btn">
-          📋 一鍵複製 Markdown 摘要（貼入 Obsidian / 筆記）
-        </button>
-
-        <div class="backup-row">
-          <button id="exportJsonBtn" class="secondary-btn">
-            ⬇️ 匯出 JSON 備份
-          </button>
-          <button id="importJsonBtn" class="secondary-btn">
-            ⬆️ 匯入 JSON 還原
-          </button>
-          <input type="file" id="importJsonInput" accept=".json,application/json" style="display: none;" />
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- 設定視窗 Modal（每日熱量上限與蛋白質目標） -->
-  <div id="settingsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h2 id="settingsModalTitle" class="modal-title">⚙️ 每日營養目標設定</h2>
-        <button type="button" class="mini-icon-btn" id="closeSettingsBtn" aria-label="關閉">✕</button>
-      </div>
-      <p style="font-size: 0.8rem; color: var(--text-secondary);">
-        調整後的目標將套用於今日及未來新增紀錄，不會影響過去歷史日期的達標判定。
-      </p>
-      <div class="input-group">
-        <label for="settingKcalInput">每日熱量上限 (kcal)</label>
-        <input type="text" id="settingKcalInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
-      </div>
-      <div class="input-group">
-        <label for="settingProteinInput">每日蛋白質目標 (g)</label>
-        <input type="text" id="settingProteinInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
-      </div>
-      <div class="input-group">
-        <label for="settingProteinInput">每日蛋白質目標 (g)</label>
-        <input type="number" id="settingProteinInput" class="form-control" inputmode="numeric" min="10" max="500" step="1" />
-      </div>
-      <div class="modal-footer">
-        <button type="button" id="cancelSettingsBtn" class="secondary-btn" style="flex: 1;">取消</button>
-        <button type="button" id="saveSettingsBtn" class="primary-submit-btn" style="flex: 1;">儲存設定</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 新增／編輯快捷食物 Modal -->
-  <div id="presetModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="presetModalTitle">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h2 id="presetModalTitle" class="modal-title">新增快捷食物</h2>
-        <button type="button" class="mini-icon-btn" id="closePresetModalBtn" aria-label="關閉">✕</button>
-      </div>
-      <input type="hidden" id="editPresetIdInput" />
-      <div class="input-group">
-        <label for="presetCategorySelect">所屬分類 *</label>
-        <select id="presetCategorySelect" class="form-control">
-          <option value="超商">超商</option>
-          <option value="飲料">飲料</option>
-          <option value="星巴克">星巴克</option>
-          <option value="速食">速食</option>
-          <option value="__custom__">＋ 自訂新分類...</option>
-        </select>
-      </div>
-      <div id="customCategoryGroup" class="input-group" style="display: none;">
-        <label for="presetCustomCategoryInput">輸入新分類名稱 *</label>
-        <input type="text" id="presetCustomCategoryInput" class="form-control" placeholder="例如：手搖飲、早餐店、健身餐..." />
-      </div>
-      <div class="input-group">
-        <label for="presetNameInput">食物名稱 *</label>
-        <input type="text" id="presetNameInput" class="form-control" placeholder="例如：乳清蛋白 1匙" />
-      </div>
-      <div class="form-row-2">
-        <div class="input-group">
-          <label for="presetKcalInput">熱量 (kcal) *</label>
-          <input type="text" id="presetKcalInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="120" />
-        </div>
-        <div class="input-group">
-          <label for="presetProteinInput">蛋白質 (g) *</label>
-          <input type="text" id="presetProteinInput" class="form-control" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="24" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" id="cancelPresetModalBtn" class="secondary-btn" style="flex: 1;">取消</button>
-        <button type="button" id="savePresetBtn" class="primary-submit-btn" style="flex: 1;">儲存快捷</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 重置預設菜單確認 Modal (不使用系統 confirm) -->
-  <div id="resetConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h2 id="resetConfirmTitle" class="modal-title">↺ 重置為內建預設菜單庫</h2>
-        <button type="button" class="mini-icon-btn" id="closeResetModalBtn" aria-label="關閉">✕</button>
-      </div>
-      <p style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.55;">
-        確定要將快捷菜單還原為系統內建的 17 項分類菜單（超商、星巴克、速食）嗎？<br>
-        <span style="color: var(--status-amber); font-weight: 600;">注意：您自行新增或修改的快捷按鈕將會被覆蓋，但每日飲食紀錄不會受到影響。</span>
-      </p>
-      <div class="modal-footer">
-        <button type="button" id="cancelResetBtn" class="secondary-btn" style="flex: 1;">取消</button>
-        <button type="button" id="confirmResetBtn" class="primary-submit-btn" style="flex: 1; background-color: var(--status-amber); color: #0f172a;">確認重置</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 月曆熱量總覽 Modal (v5 新增) -->
-  <div id="calendarModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="calendarModalTitle">
-    <div class="modal-box calendar-modal-box">
-      <div class="modal-header">
-        <h2 id="calendarModalTitle" class="modal-title">📅 每日熱量與達標月曆</h2>
-        <button type="button" class="mini-icon-btn" id="closeCalendarModalBtn" aria-label="關閉月曆">✕</button>
+  <!-- 3. 月曆總覽 Bottom Sheet Modal -->
+  <div id="calendarSheet" class="bottom-sheet-mask" role="dialog" aria-modal="true" aria-labelledby="calSheetHeading">
+    <div class="bottom-sheet-card">
+      <div class="sheet-handle"></div>
+      <div class="sheet-top-bar">
+        <h2 id="calSheetHeading" class="sheet-heading">月曆熱量與達標總覽</h2>
+        <button type="button" id="closeCalBtn" class="sheet-dismiss-btn" aria-label="關閉月曆">✕</button>
       </div>
 
-      <div class="cal-month-nav">
-        <button type="button" id="calPrevMonthBtn" class="date-nav-btn" title="上個月" aria-label="上個月">&lt;</button>
-        <span id="calMonthTitle" class="cal-month-title">2026年 11月</span>
-        <button type="button" id="calNextMonthBtn" class="date-nav-btn" title="下個月" aria-label="下個月">&gt;</button>
+      <div class="cal-month-switcher">
+        <button type="button" id="calPrevMonthBtn" class="step-arrow-btn" aria-label="上個月">‹</button>
+        <span id="calMonthLabel" class="cal-month-text tabular">2026年 11月</span>
+        <button type="button" id="calNextMonthBtn" class="step-arrow-btn" aria-label="下個月">›</button>
       </div>
 
-      <div class="cal-summary-bar">
+      <div class="cal-summary-trio tabular">
         <div class="cal-stat-box">
-          <span class="cal-stat-label">本月有紀錄天數</span>
-          <span id="calLoggedDaysText" class="cal-stat-val">0 天</span>
+          <div class="cal-stat-lbl">紀錄天數</div>
+          <div id="calStatLoggedDays" class="cal-stat-num">0 天</div>
         </div>
         <div class="cal-stat-box">
-          <span class="cal-stat-label">紀錄日平均熱量</span>
-          <span id="calAvgKcalText" class="cal-stat-val">0 kcal</span>
+          <div class="cal-stat-lbl">日均熱量</div>
+          <div id="calStatAvgCal" class="cal-stat-num">0 kcal</div>
+        </div>
+        <div class="cal-stat-box">
+          <div class="cal-stat-lbl">蛋白達標</div>
+          <div id="calStatProDays" class="cal-stat-num">0 天</div>
         </div>
       </div>
 
       <div class="cal-weekdays">
-        <span>日</span>
-        <span>一</span>
-        <span>二</span>
-        <span>三</span>
-        <span>四</span>
-        <span>五</span>
-        <span>六</span>
+        <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
       </div>
 
-      <div id="calGrid" class="cal-grid"></div>
+      <div id="calMatrixGrid" class="cal-matrix tabular"></div>
 
       <div class="cal-legend">
-        <span class="cal-legend-item"><i class="cal-dot green"></i>蛋白達標且熱量內</span>
-        <span class="cal-legend-item"><i class="cal-dot red"></i>熱量超標</span>
-        <span class="cal-legend-item"><i class="cal-dot blue"></i>紀錄中</span>
+        <span class="cal-legend-item"><i class="cal-dot emerald"></i>蛋白達標且熱量內</span>
+        <span class="cal-legend-item"><i class="cal-dot blue"></i>熱量內已紀錄</span>
+        <span class="cal-legend-item"><i class="cal-dot rose"></i>熱量超標</span>
       </div>
     </div>
   </div>
 
-  <!-- 底部 Toast 與刪除復原條容器 -->
-  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+  <!-- 4. 設定、菜單管理與 JSON 備份 Bottom Sheet Modal -->
+  <div id="settingsSheet" class="bottom-sheet-mask" role="dialog" aria-modal="true" aria-labelledby="settingsSheetHeading">
+    <div class="bottom-sheet-card">
+      <div class="sheet-handle"></div>
+      <div class="sheet-top-bar">
+        <h2 id="settingsSheetHeading" class="sheet-heading">目標設定與資料管理</h2>
+        <button type="button" id="closeSettingsBtn" class="sheet-dismiss-btn" aria-label="關閉設定">✕</button>
+      </div>
+
+      <!-- 外觀主題切換 -->
+      <div class="setting-block">
+        <div class="setting-block-title">外觀主題</div>
+        <div class="theme-seg-control" id="themeSegControl">
+          <button type="button" class="theme-seg-btn" data-theme-mode="system">跟隨系統 (Auto)</button>
+          <button type="button" class="theme-seg-btn" data-theme-mode="light">淺色 (Light)</button>
+          <button type="button" class="theme-seg-btn" data-theme-mode="dark">深色 (Dark)</button>
+        </div>
+      </div>
+
+      <!-- 每日熱量與蛋白質目標 -->
+      <div class="setting-block">
+        <div class="setting-block-title">每日營養目標</div>
+        <div class="grid-2-cols">
+          <div class="input-stack">
+            <label for="goalCalInput">熱量目標 (kcal)</label>
+            <input type="text" id="goalCalInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+          </div>
+          <div class="input-stack">
+            <label for="goalProInput">蛋白質目標 (g)</label>
+            <input type="text" id="goalProInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+          </div>
+        </div>
+        <button type="button" id="saveGoalSettingsBtn" class="primary-action-btn" style="margin-top: 2px;">儲存目標設定</button>
+      </div>
+
+      <!-- 新增與管理快捷菜單項目 -->
+      <div class="setting-block">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span class="setting-block-title">快捷菜單管理</span>
+          <button type="button" id="restoreDefaultPresetsBtn" style="font-size: 0.74rem; font-weight: 700; color: var(--accent-cal);">＋ 補齊預設品項</button>
+        </div>
+        <div class="grid-2-cols">
+          <input type="text" id="newPresetNameInput" class="clean-input" placeholder="新增品項名稱" />
+          <select id="newPresetCatSelect" class="clean-input">
+            <option value="超商">超商</option>
+            <option value="飲料">飲料</option>
+            <option value="星巴克">星巴克</option>
+            <option value="速食">速食</option>
+            <option value="自訂" selected>自訂</option>
+          </select>
+        </div>
+        <div class="grid-2-cols">
+          <input type="text" id="newPresetCalInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="熱量 kcal" />
+          <input type="text" id="newPresetProInput" class="clean-input tabular" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="蛋白質 g" />
+        </div>
+        <button type="button" id="addNewPresetBtn" class="secondary-btn">＋ 加入快捷菜單</button>
+        <div id="managePresetList" class="preset-scroll-box"></div>
+      </div>
+
+      <!-- JSON 匯出與匯入備份 -->
+      <div class="setting-block">
+        <div class="setting-block-title">資料備份與還原</div>
+        <div class="grid-2-cols">
+          <button type="button" id="exportBackupBtn" class="secondary-btn">⬇️ 匯出 JSON 備份</button>
+          <button type="button" id="importBackupBtn" class="secondary-btn">⬆️ 匯入 JSON 還原</button>
+          <input type="file" id="importBackupFile" accept=".json,application/json" style="display: none;" />
+        </div>
+        <div class="backup-hint-box">
+          資料皆安全儲存於此裝置本機空間。刪除主畫面書籤或更換手機前，請先匯出 JSON 備份。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 底部浮動 Toast + Undo 提示區 -->
+  <div id="floatingToastArea" class="floating-toast-area" aria-live="polite"></div>
 
   <script>
     /**
-     * Pure Nutrition Tracker (v6) — 核心狀態與應用程式邏輯
-     * 儲存鍵名規範：
-     * - pnt_settings : { targetKcal, targetProtein, theme, lastBackupAt }
-     * - pnt_presets  : Array<{ id, category, name, kcal, protein }>
-     * - pnt_preset_schema_version : 'v6'
-     * - pnt_seen_builtin_ids : Array<string> (追蹤已匯入過的內建品項 ID，避免刪除後重複跳出)
-     * - pnt_logs_YYYY-MM-DD : { targetKcal, targetProtein, items: Array<{ id, name, category, kcal, protein, meal, time }> }
+     * Pure Nutrition Tracker v7 — Apple Health & Bento Grid Engine
+     * 100% 保留並相容既有 localStorage 鍵名與結構：
+     * - pnt_settings: { calGoal: 1900, proGoal: 100, theme?: 'system'|'light'|'dark' }
+     * - pnt_presets: Array<{ id, name, category, cal, pro }>
+     * - pnt_logs_YYYY-MM-DD: Array<{ id, name, cal, pro, meal, time }> (同時相容 { items: [...] } 舊格式讀取)
      */
     (function () {
       'use strict';
 
-      // ========================================================================
-      // 1. 常數與預設分類菜單庫定義 (v6：新增「飲料」分類，保留超商、星巴克、速食)
-      // ========================================================================
+      // ======================================================================
+      // 1. 儲存鍵名與預設菜單定義
+      // ======================================================================
       const STORAGE_KEYS = {
         SETTINGS: 'pnt_settings',
         PRESETS: 'pnt_presets',
-        PRESET_SCHEMA_VERSION: 'pnt_preset_schema_version',
-        SEEN_BUILTIN_IDS: 'pnt_seen_builtin_ids',
         LOG_PREFIX: 'pnt_logs_'
       };
 
-      const CURRENT_PRESET_SCHEMA_VERSION = 'v6';
-      const BASE_CATEGORIES = ['超商', '飲料', '星巴克', '速食'];
-
-      // 舊版升級時需自動清理的通用餐廳與含牛預設品項
-      const REMOVED_LEGACY_PRESET_IDS = new Set(['rt1', 'rt2', 'rt3', 'rt4', 'rt5', 'rt6']);
-      const REMOVED_LEGACY_PRESET_NAMES = new Set([
-        '滷雞腿便當 去皮飯半碗',
-        '排骨便當 飯半碗',
-        '健康水煮餐盒 雞胸',
-        '牛肉麵 清燉/紅燒',
-        '親子丼 / 雞肉丼飯',
-        '涮涮鍋 梅花豬+菜盤無加工料'
-      ]);
+      const CATEGORIES = ['全部', '超商', '飲料', '星巴克', '速食', '自訂'];
 
       const DEFAULT_SETTINGS = {
-        targetKcal: 2000,
-        targetProtein: 110,
-        theme: 'light',
-        lastBackupAt: null
+        calGoal: 1900,
+        proGoal: 100,
+        theme: 'system'
       };
 
+      // 內建精選菜單庫 (嚴格無牛)
       const DEFAULT_PRESETS = [
-        // 超商 (6項)
-        { id: 'cs1', category: '超商', name: '超商健身餐盒', kcal: 520, protein: 28 },
-        { id: 'cs2', category: '超商', name: '無糖高纖豆漿 (400ml)', kcal: 165, protein: 14 },
-        { id: 'cs3', category: '超商', name: '無糖拿鐵 (大杯)', kcal: 150, protein: 8 },
-        { id: 'cs4', category: '超商', name: '希臘優格 (無糖)', kcal: 110, protein: 10 },
-        { id: 'cs5', category: '超商', name: '茶葉蛋 / 水煮蛋 (1顆)', kcal: 75, protein: 7 },
-        { id: 'cs6', category: '超商', name: '超商即食雞胸肉', kcal: 120, protein: 23 },
+        // 超商
+        { id: 'def_cs_1', category: '超商', name: '7-11 雙拼烤雞握便當', cal: 485, pro: 26 },
+        { id: 'def_cs_2', category: '超商', name: '7-11 鹽烤豬肉便當', cal: 580, pro: 24 },
+        { id: 'def_cs_3', category: '超商', name: '7-11 椒鹽雞胸肉', cal: 135, pro: 25 },
+        { id: 'def_cs_4', category: '超商', name: '統一無加糖高纖豆漿', cal: 161, pro: 13.6 },
+        { id: 'def_cs_5', category: '超商', name: '義美無糖厚濃豆漿', cal: 195, pro: 18 },
+        { id: 'def_cs_6', category: '超商', name: '茶葉蛋', cal: 75, pro: 7 },
+        { id: 'def_cs_7', category: '超商', name: '希臘式優格', cal: 115, pro: 9 },
 
-        // 飲料 (2項)
-        { id: 'dr1', category: '飲料', name: '超商美式', kcal: 8, protein: 0.6 },
-        { id: 'dr2', category: '飲料', name: '超商拿鐵', kcal: 185, protein: 6 },
+        // 飲料
+        { id: 'def_dr_1', category: '飲料', name: '超商美式', cal: 8, pro: 0.6 },
+        { id: 'def_dr_2', category: '飲料', name: '超商拿鐵', cal: 185, pro: 6 },
 
-        // 星巴克 (3項)
-        { id: 'sb1', category: '星巴克', name: '星巴克 總匯三明治', kcal: 513, protein: 27.9 },
-        { id: 'sb2', category: '星巴克', name: '星巴克 烤雞生吐司三明治', kcal: 342, protein: 21 },
-        { id: 'sb3', category: '星巴克', name: '星巴克 大杯熱拿鐵', kcal: 295, protein: 10 },
+        // 星巴克
+        { id: 'def_sb_1', category: '星巴克', name: '無糖冰美式 大杯', cal: 15, pro: 1 },
+        { id: 'def_sb_2', category: '星巴克', name: '無糖冰那堤 大杯', cal: 160, pro: 11 },
+        { id: 'def_sb_3', category: '星巴克', name: '烤雞生吐司三明治', cal: 345, pro: 21 },
+        { id: 'def_sb_4', category: '星巴克', name: '起司里肌可頌', cal: 390, pro: 17 },
 
-        // 速食 (8項，無牛)
-        { id: 'ff8', category: '速食', name: '麥當勞 四塊麥克雞塊', kcal: 174, protein: 10 },
-        { id: 'ff1', category: '速食', name: '麥當勞 嫩煎鷄腿堡', kcal: 363, protein: 25 },
-        { id: 'ff2', category: '速食', name: '麥當勞 麥香鷄', kcal: 380, protein: 15 },
-        { id: 'ff3', category: '速食', name: '麥當勞 勁辣鷄腿堡', kcal: 490, protein: 23 },
-        { id: 'ff4', category: '速食', name: '麥當勞 麥克鷄塊 6塊', kcal: 270, protein: 15 },
-        { id: 'ff5', category: '速食', name: '肯德基 紙包雞', kcal: 354, protein: 34 },
-        { id: 'ff6', category: '速食', name: '肯德基 咔啦脆雞 1塊', kcal: 285, protein: 21 },
-        { id: 'ff7', category: '速食', name: '肯德基 原味蛋撻 1顆', kcal: 182, protein: 3.5 }
+        // 速食 (無牛)
+        { id: 'def_ff_1', category: '速食', name: '麥當勞 嫩煎雞腿堡', cal: 363, pro: 26 },
+        { id: 'def_ff_2', category: '速食', name: '麥當勞 麥脆雞腿 1塊', cal: 290, pro: 19 },
+        { id: 'def_ff_3', category: '速食', name: '麥當勞 四塊麥克雞塊', cal: 180, pro: 10 },
+        { id: 'def_ff_4', category: '速食', name: '肯德基 青花椒香麻咔啦雞腿堡', cal: 490, pro: 24 },
+        { id: 'def_ff_5', category: '速食', name: '肯德基 上校薄脆雞 1塊', cal: 270, pro: 20 },
+        { id: 'def_ff_6', category: '速食', name: '肯德基 原味蛋撻', cal: 182, pro: 3 }
       ];
 
-      // ========================================================================
-      // 2. 應用程式狀態 (State)
-      // ========================================================================
+      // ======================================================================
+      // 2. 狀態管理與向下相容資料載入
+      // ======================================================================
       let settings = loadSettings();
       let presets = loadPresets();
-      let currentDateStr = getTodayDateStr();
-      let selectedCategory = '全部';
-      let selectedMultiplier = 1;
-      let selectedQuickMeal = '自動'; // '自動' | '早餐' | '午餐' | '晚餐' | '點心'
-      let selectedManualMeal = detectCurrentMealByTime();
-      let isManagePresetsMode = false;
-      let undoBuffer = null; // 暫存最近一次刪除的紀錄供 Toast Undo 復原
-      let calendarViewYear = Number(currentDateStr.split('-')[0]);
-      let calendarViewMonth = Number(currentDateStr.split('-')[1]); // 1-12
+      let selectedDate = getTodayStr();
+      let activeCategory = '全部';
+      let activeMealOverride = '自動'; // '自動' | '早餐' | '午餐' | '晚餐' | '點心'
+      let saveManualAsPreset = false;
+      let lastDeletedBackup = null;
+      let calMonthYear = Number(selectedDate.split('-')[0]);
+      let calMonthNum = Number(selectedDate.split('-')[1]);
 
-      // ========================================================================
-      // 3. 日期與時間工具函式
-      // ========================================================================
-      function getTodayDateStr() {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-      }
-
-      function shiftDateStr(dateStr, deltaDays) {
-        const [y, m, d] = dateStr.split('-').map(Number);
-        const dt = new Date(y, m - 1, d);
-        dt.setDate(dt.getDate() + deltaDays);
-        const ny = dt.getFullYear();
-        const nm = String(dt.getMonth() + 1).padStart(2, '0');
-        const nd = String(dt.getDate()).padStart(2, '0');
-        return `${ny}-${nm}-${nd}`;
-      }
-
-      function formatDisplayDate(dateStr) {
-        const today = getTodayDateStr();
-        const yesterday = shiftDateStr(today, -1);
-        const [y, m, d] = dateStr.split('-').map(Number);
-        const dt = new Date(y, m - 1, d);
-        const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-        const w = weekdays[dt.getDay()];
-        const base = `${m}/${d} (${w})`;
-
-        if (dateStr === today) return `今日 · ${base}`;
-        if (dateStr === yesterday) return `昨日 · ${base}`;
-        return `${y}/${base}`;
-      }
-
-      function getCurrentTimeHHMM() {
-        const now = new Date();
-        return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      }
-
-      // 依據系統當下時間自動判斷餐別
-      function detectCurrentMealByTime() {
-        const now = new Date();
-        const mins = now.getHours() * 60 + now.getMinutes();
-        if (mins >= 300 && mins <= 630) return '早餐';   // 05:00 - 10:30
-        if (mins >= 631 && mins <= 870) return '午餐';   // 10:31 - 14:30
-        if (mins >= 871 && mins <= 1050) return '點心';  // 14:31 - 17:30
-        if (mins >= 1051 && mins <= 1290) return '晚餐'; // 17:31 - 21:30
-        return '點心';
-      }
-
-      function roundNum(val) {
-        return Math.round(val * 10) / 10;
-      }
-
-      // 解析支援逗號或小數點的數字輸入（相容各語系小數鍵盤）
-      function parseDecimalInput(rawVal) {
-        if (rawVal === null || rawVal === undefined) return NaN;
-        const normalized = String(rawVal).trim().replace(/,/g, '.');
-        if (normalized === '') return NaN;
-        return Number(normalized);
-      }
-
-      // ========================================================================
-      // 4. LocalStorage 讀寫與資料快照管理
-      // ========================================================================
       function loadSettings() {
         try {
           const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-          if (!raw) return { ...DEFAULT_SETTINGS };
-          return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+          if (!raw) {
+            localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
+            return { ...DEFAULT_SETTINGS };
+          }
+          const parsed = JSON.parse(raw);
+          const calGoal = Number(parsed.calGoal ?? parsed.targetKcal) || DEFAULT_SETTINGS.calGoal;
+          const proGoal = Number(parsed.proGoal ?? parsed.targetProtein) || DEFAULT_SETTINGS.proGoal;
+          const theme = parsed.theme || 'system';
+          const normalized = { calGoal, proGoal, theme };
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(normalized));
+          return normalized;
         } catch (e) {
-          console.error('讀取設定失敗', e);
           return { ...DEFAULT_SETTINGS };
         }
       }
 
       function saveSettings() {
         try {
-          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
-        } catch (e) {
-          showToast('儲存設定失敗，請檢查瀏覽器儲存空間');
-        }
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify({
+            calGoal: settings.calGoal,
+            proGoal: settings.proGoal,
+            theme: settings.theme
+          }));
+        } catch (e) { /* 忽略儲存配額異常 */ }
       }
 
       function loadPresets() {
         try {
           const raw = localStorage.getItem(STORAGE_KEYS.PRESETS);
-          const storedSchemaVersion = localStorage.getItem(STORAGE_KEYS.PRESET_SCHEMA_VERSION);
-          const seenRaw = localStorage.getItem(STORAGE_KEYS.SEEN_BUILTIN_IDS);
-          let seenIds = new Set();
-          if (seenRaw) {
-            try {
-              const arr = JSON.parse(seenRaw);
-              if (Array.isArray(arr)) seenIds = new Set(arr);
-            } catch (e) { /* 忽略損毀紀錄 */ }
-          }
-
           if (!raw) {
             const initial = DEFAULT_PRESETS.map(p => ({ ...p }));
-            const allIds = DEFAULT_PRESETS.map(p => p.id);
             localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(initial));
-            localStorage.setItem(STORAGE_KEYS.SEEN_BUILTIN_IDS, JSON.stringify(allIds));
-            localStorage.setItem(STORAGE_KEYS.PRESET_SCHEMA_VERSION, CURRENT_PRESET_SCHEMA_VERSION);
             return initial;
           }
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return DEFAULT_PRESETS.map(p => ({ ...p }));
 
-          let parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) {
-            return DEFAULT_PRESETS.map(p => ({ ...p }));
-          }
+          // 正規化欄位 (支援 cal/pro 與舊版 kcal/protein) 並排除任何含牛品項
+          const list = parsed
+            .filter(item => item && !String(item.name || '').includes('牛'))
+            .map(item => ({
+              id: item.id || ('p_' + Math.random().toString(36).slice(2, 8)),
+              name: String(item.name || ''),
+              category: item.category || '自訂',
+              cal: Number(item.cal ?? item.kcal) || 0,
+              pro: Number(item.pro ?? item.protein) || 0
+            }));
 
-          // 向下相容：為舊版無 category 欄位的項目補上預設分類「超商」
-          parsed = parsed.map(item => ({
-            ...item,
-            category: (item.category && String(item.category).trim()) ? String(item.category).trim() : '超商'
-          }));
-
-          // 從舊版 (v1/v2/v3) 升級至 v4 時，自動清除「常見餐廳」通用項目與任何含「牛」品項，同時保留使用者自訂項目
-          let migrated = false;
-          if (storedSchemaVersion !== CURRENT_PRESET_SCHEMA_VERSION) {
-            const beforeLen = parsed.length;
-            parsed = parsed.filter(item => {
-              const itemName = String(item.name || '');
-              const isLegacyRestaurant = REMOVED_LEGACY_PRESET_IDS.has(item.id) || REMOVED_LEGACY_PRESET_NAMES.has(itemName);
-              const containsBeef = itemName.includes('牛');
-              return !isLegacyRestaurant && !containsBeef;
-            });
-            if (parsed.length !== beforeLen) {
-              migrated = true;
-            }
-          }
-
-          // 同步最新內建菜單名稱與數值（若使用者未自行修改過且 ID 相同）
-          const defaultMap = new Map(DEFAULT_PRESETS.map(d => [d.id, d]));
-          parsed = parsed.map(item => {
-            if (defaultMap.has(item.id) && storedSchemaVersion !== CURRENT_PRESET_SCHEMA_VERSION) {
-              return { ...defaultMap.get(item.id) };
-            }
-            return item;
-          });
-
-          // 首次升級追蹤機制時，先標記既有清單中已存在的品項為已見過
-          if (!seenRaw) {
-            parsed.forEach(p => {
-              if (p.id) seenIds.add(p.id);
-            });
-          }
-
-          // 自動合併「從未匯入過的新版內建菜單」(保留使用者已刪除的舊內建品項不強迫還原)
-          const existingIds = new Set(parsed.map(p => p.id));
-          const existingNames = new Set(parsed.map(p => p.name));
-          let addedCount = 0;
-
-          DEFAULT_PRESETS.forEach(defItem => {
-            if (!seenIds.has(defItem.id)) {
-              if (!existingIds.has(defItem.id) && !existingNames.has(defItem.name)) {
-                parsed.push({ ...defItem });
-                addedCount++;
-              }
-              seenIds.add(defItem.id);
+          // 安全合併缺漏的預設品項（例如新增的「飲料」品項），不覆蓋使用者自訂項目
+          const existingNames = new Set(list.map(p => p.name));
+          let merged = false;
+          DEFAULT_PRESETS.forEach(def => {
+            if (!existingNames.has(def.name)) {
+              list.push({ ...def });
+              merged = true;
             }
           });
 
-          localStorage.setItem(STORAGE_KEYS.SEEN_BUILTIN_IDS, JSON.stringify(Array.from(seenIds)));
-          localStorage.setItem(STORAGE_KEYS.PRESET_SCHEMA_VERSION, CURRENT_PRESET_SCHEMA_VERSION);
-          if (migrated || addedCount > 0 || !seenRaw || storedSchemaVersion !== CURRENT_PRESET_SCHEMA_VERSION) {
-            localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(parsed));
+          if (merged) {
+            localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(list));
           }
-
-          return parsed;
+          return list;
         } catch (e) {
           return DEFAULT_PRESETS.map(p => ({ ...p }));
         }
@@ -1745,935 +1686,87 @@
       function savePresets() {
         try {
           localStorage.setItem(STORAGE_KEYS.PRESETS, JSON.stringify(presets));
-        } catch (e) {
-          showToast('儲存快捷清單失敗');
-        }
+        } catch (e) { /* 忽略 */ }
       }
 
-      // 取得特定日期的紀錄物件（若尚無紀錄則回傳帶有目前設定目標的空結構）
-      function getDayLog(dateStr) {
+      function getLogsForDate(dateStr) {
         try {
           const raw = localStorage.getItem(STORAGE_KEYS.LOG_PREFIX + dateStr);
-          if (!raw) {
-            return {
-              targetKcal: settings.targetKcal,
-              targetProtein: settings.targetProtein,
-              items: []
-            };
-          }
+          if (!raw) return [];
           const parsed = JSON.parse(raw);
-          return {
-            targetKcal: Number(parsed.targetKcal) || settings.targetKcal,
-            targetProtein: Number(parsed.targetProtein) || settings.targetProtein,
-            items: Array.isArray(parsed.items) ? parsed.items : []
-          };
+          // 支援標準陣列格式或舊版物件 { items: [...] } 格式
+          const arr = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.items) ? parsed.items : []);
+          return arr.map(entry => ({
+            id: entry.id || ('log_' + Math.random().toString(36).slice(2, 8)),
+            name: String(entry.name || '飲食紀錄'),
+            cal: Number(entry.cal ?? entry.kcal) || 0,
+            pro: Number(entry.pro ?? entry.protein) || 0,
+            meal: normalizeMealName(entry.meal),
+            time: entry.time || ''
+          }));
         } catch (e) {
-          return {
-            targetKcal: settings.targetKcal,
-            targetProtein: settings.targetProtein,
-            items: []
-          };
+          return [];
         }
       }
 
-      function saveDayLog(dateStr, logObj) {
+      function saveLogsForDate(dateStr, logsArray) {
         try {
-          localStorage.setItem(STORAGE_KEYS.LOG_PREFIX + dateStr, JSON.stringify(logObj));
+          localStorage.setItem(STORAGE_KEYS.LOG_PREFIX + dateStr, JSON.stringify(logsArray));
         } catch (e) {
-          showToast('儲存紀錄失敗，請確認儲存空間');
+          showToast('儲存空間不足，請先匯出 JSON 備份');
         }
       }
 
-      // ========================================================================
-      // 5. 核心業務操作 (新增、重複、刪除、復原)
-      // ========================================================================
-      function addFoodEntry({ name, category, kcal, protein, meal }) {
-        const log = getDayLog(currentDateStr);
-        // 若該日尚無任何紀錄，寫入第一筆時鎖定當下的目標快照
-        if (log.items.length === 0) {
-          log.targetKcal = settings.targetKcal;
-          log.targetProtein = settings.targetProtein;
-        }
-
-        const newItem = {
-          id: 'item_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-          name: name.trim() || '外食紀錄',
-          category: category || '',
-          kcal: roundNum(Number(kcal) || 0),
-          protein: roundNum(Number(protein) || 0),
-          meal: meal || detectCurrentMealByTime(),
-          time: getCurrentTimeHHMM()
-        };
-
-        log.items.unshift(newItem); // 最新紀錄置頂顯示
-        saveDayLog(currentDateStr, log);
-        renderAll();
-        return newItem;
+      // ======================================================================
+      // 3. 日期、時間與數值格式化工具
+      // ======================================================================
+      function getTodayStr() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       }
 
-      function handleQuickAdd(preset) {
-        const mult = selectedMultiplier;
-        const actualKcal = roundNum(preset.kcal * mult);
-        const actualProtein = roundNum(preset.protein * mult);
-        const displayName = mult === 1 ? preset.name : `${preset.name} (×${mult})`;
-        const targetMeal = selectedQuickMeal === '自動' ? detectCurrentMealByTime() : selectedQuickMeal;
-
-        addFoodEntry({
-          name: displayName,
-          category: preset.category || '超商',
-          kcal: actualKcal,
-          protein: actualProtein,
-          meal: targetMeal
-        });
-
-        // 點擊後自動歸位回 1 份與「自動」餐別，維持流暢單手體驗
-        let needControlRerender = false;
-        if (selectedMultiplier !== 1) {
-          selectedMultiplier = 1;
-          needControlRerender = true;
-        }
-        if (selectedQuickMeal !== '自動') {
-          selectedQuickMeal = '自動';
-          needControlRerender = true;
-        }
-        if (needControlRerender) {
-          renderPortionBar();
-          renderPresets();
-        }
-
-        showToast(`已加入[${targetMeal}]：${displayName} (+${actualKcal} kcal / +${actualProtein}g)`);
+      function addDays(dateStr, delta) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
+        dt.setDate(dt.getDate() + delta);
+        return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
       }
 
-      function repeatLogItem(itemId) {
-        const log = getDayLog(currentDateStr);
-        const target = log.items.find(i => i.id === itemId);
-        if (!target) return;
-
-        addFoodEntry({
-          name: target.name,
-          category: target.category || '',
-          kcal: target.kcal,
-          protein: target.protein,
-          meal: target.meal
-        });
-        showToast(`已重複紀錄：${target.name}`);
+      function getCurrentHHMM() {
+        const d = new Date();
+        return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
       }
 
-      function deleteLogItem(itemId) {
-        const log = getDayLog(currentDateStr);
-        const idx = log.items.findIndex(i => i.id === itemId);
-        if (idx === -1) return;
-
-        const [removed] = log.items.splice(idx, 1);
-        saveDayLog(currentDateStr, log);
-        renderAll();
-
-        undoBuffer = {
-          dateStr: currentDateStr,
-          item: removed,
-          index: idx
-        };
-
-        showToast(`已刪除「${removed.name}」`, true);
+      // 自動餐別判斷 (05:00-10:30 早餐, 10:31-15:00 午餐, 15:01-21:00 晚餐, 其餘 點心)
+      function detectMealByTime() {
+        const now = new Date();
+        const mins = now.getHours() * 60 + now.getMinutes();
+        if (mins >= 300 && mins <= 630) return '早餐';
+        if (mins >= 631 && mins <= 900) return '午餐';
+        if (mins >= 901 && mins <= 1260) return '晚餐';
+        return '點心';
       }
 
-      function undoLastDelete() {
-        if (!undoBuffer) return;
-        const { dateStr, item, index } = undoBuffer;
-        const log = getDayLog(dateStr);
-        const insertIdx = Math.min(index, log.items.length);
-        log.items.splice(insertIdx, 0, item);
-        saveDayLog(dateStr, log);
-        undoBuffer = null;
-
-        if (currentDateStr !== dateStr) {
-          currentDateStr = dateStr;
-        }
-        renderAll();
-        showToast(`已復原「${item.name}」`);
+      function normalizeMealName(meal) {
+        if (!meal) return '點心';
+        if (meal.includes('早')) return '早餐';
+        if (meal.includes('午')) return '午餐';
+        if (meal.includes('晚')) return '晚餐';
+        return '點心';
       }
 
-      // ========================================================================
-      // 6. 介面渲染函式 (UI Rendering)
-      // ========================================================================
-      function applyTheme() {
-        const isDark = settings.theme === 'dark';
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-        const btn = document.getElementById('themeToggleBtn');
-        btn.innerHTML = isDark
-          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
-          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+      function round1(n) {
+        return Math.round(n * 10) / 10;
       }
 
-      function renderBackupStatus() {
-        const el = document.getElementById('backupStatusText');
-        if (!settings.lastBackupAt) {
-          el.textContent = '尚未建立 JSON 備份 · 建議定期匯出';
-          el.className = 'backup-status warning';
-          return;
-        }
-        const diffMs = Date.now() - settings.lastBackupAt;
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays >= 7) {
-          el.textContent = `⚠️ 距離上次備份已過 ${diffDays} 天`;
-          el.className = 'backup-status warning';
-        } else if (diffDays === 0) {
-          el.textContent = '✓ 今日已完成資料備份';
-          el.className = 'backup-status';
-        } else {
-          el.textContent = `上次備份：${diffDays} 天前`;
-          el.className = 'backup-status';
-        }
+      function fmtNum(n) {
+        return round1(n).toLocaleString('en-US', { maximumFractionDigits: 1 });
       }
 
-      function renderDateNav() {
-        document.getElementById('dateDisplayText').textContent = formatDisplayDate(currentDateStr);
-        document.getElementById('datePickerInput').value = currentDateStr;
-        const isToday = currentDateStr === getTodayDateStr();
-        document.getElementById('backToTodayBtn').style.display = isToday ? 'none' : 'inline-flex';
-      }
-
-      function renderDashboard() {
-        const log = getDayLog(currentDateStr);
-        // 若當日尚無紀錄，即時顯示最新設定目標；若有紀錄則使用當日目標快照
-        const targetKcal = log.items.length > 0 ? log.targetKcal : settings.targetKcal;
-        const targetProtein = log.items.length > 0 ? log.targetProtein : settings.targetProtein;
-
-        const consumedKcal = roundNum(log.items.reduce((sum, item) => sum + (Number(item.kcal) || 0), 0));
-        const consumedProtein = roundNum(log.items.reduce((sum, item) => sum + (Number(item.protein) || 0), 0));
-
-        // 1. 熱量卡片計算與視覺狀態
-        const remKcal = roundNum(targetKcal - consumedKcal);
-        const kcalRatio = targetKcal > 0 ? (consumedKcal / targetKcal) : 0;
-        const kcalPct = Math.round(kcalRatio * 100);
-
-        const kcalMainEl = document.getElementById('kcalRemainingText');
-        const kcalBarEl = document.getElementById('kcalProgressBar');
-
-        if (remKcal >= 0) {
-          kcalMainEl.textContent = `剩餘 ${remKcal} kcal`;
-        } else {
-          kcalMainEl.textContent = `超出 ${Math.abs(remKcal)} kcal`;
-        }
-
-        kcalMainEl.className = 'metric-main';
-        kcalBarEl.className = 'progress-fill';
-
-        if (kcalRatio > 1) {
-          kcalMainEl.classList.add('status-danger');
-          kcalBarEl.classList.add('fill-red');
-        } else if (kcalRatio >= 0.85) {
-          kcalMainEl.classList.add('status-warn');
-          kcalBarEl.classList.add('fill-amber');
-        } else {
-          kcalMainEl.classList.add('status-normal');
-          kcalBarEl.classList.add('fill-blue');
-        }
-
-        kcalBarEl.style.width = `${Math.min(100, kcalPct)}%`;
-        document.getElementById('kcalPercentBadge').textContent = `${kcalPct}%`;
-        document.getElementById('kcalConsumedText').textContent = consumedKcal;
-        document.getElementById('kcalTargetText').textContent = targetKcal;
-
-        // 2. 蛋白質卡片計算與視覺狀態
-        const remProtein = roundNum(targetProtein - consumedProtein);
-        const proteinRatio = targetProtein > 0 ? (consumedProtein / targetProtein) : 0;
-        const proteinPct = Math.round(proteinRatio * 100);
-
-        const proteinMainEl = document.getElementById('proteinRemainingText');
-        const proteinBarEl = document.getElementById('proteinProgressBar');
-
-        proteinMainEl.className = 'metric-main';
-        proteinBarEl.className = 'progress-fill';
-
-        if (remProtein <= 0) {
-          const extra = Math.abs(remProtein);
-          proteinMainEl.textContent = extra > 0 ? `已達標 (+${extra} g)` : '已達標！';
-          proteinMainEl.classList.add('status-success');
-          proteinBarEl.classList.add('fill-green');
-        } else {
-          proteinMainEl.textContent = `還差 ${remProtein} g`;
-          proteinMainEl.classList.add('status-normal');
-          proteinBarEl.classList.add('fill-blue');
-        }
-
-        proteinBarEl.style.width = `${Math.min(100, proteinPct)}%`;
-        document.getElementById('proteinPercentBadge').textContent = `${proteinPct}%`;
-        document.getElementById('proteinConsumedText').textContent = consumedProtein;
-        document.getElementById('proteinTargetText').textContent = targetProtein;
-      }
-
-      function renderPortionBar() {
-        const multBtns = document.querySelectorAll('#portionControlBar .portion-btn');
-        multBtns.forEach(btn => {
-          const mult = Number(btn.getAttribute('data-mult'));
-          btn.classList.toggle('active', mult === selectedMultiplier);
-        });
-
-        const mealBtns = document.querySelectorAll('#quickMealControlBar .quick-meal-btn');
-        mealBtns.forEach(btn => {
-          const qmeal = btn.getAttribute('data-qmeal');
-          btn.classList.toggle('active', qmeal === selectedQuickMeal);
-        });
-      }
-
-      function getAvailableCategories() {
-        const set = new Set(['全部', ...BASE_CATEGORIES]);
-        presets.forEach(p => {
-          if (p.category) set.add(p.category);
-        });
-        return Array.from(set);
-      }
-
-      function renderCategoryTabs() {
-        const tabsEl = document.getElementById('categoryTabs');
-        const categories = getAvailableCategories();
-
-        // 若目前選取的自訂分類已被全數刪除，自動切回「全部」
-        if (!categories.includes(selectedCategory)) {
-          selectedCategory = '全部';
-        }
-
-        tabsEl.innerHTML = '';
-        categories.forEach(cat => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'cat-tab' + (cat === selectedCategory ? ' active' : '');
-          btn.setAttribute('role', 'tab');
-          btn.setAttribute('aria-selected', cat === selectedCategory ? 'true' : 'false');
-          btn.textContent = cat;
-          btn.addEventListener('click', () => {
-            selectedCategory = cat;
-            renderCategoryTabs();
-            renderPresets();
-          });
-          tabsEl.appendChild(btn);
-        });
-      }
-
-      function renderPresets() {
-        const gridEl = document.getElementById('presetGrid');
-        const manageAreaEl = document.getElementById('presetManageArea');
-        const portionBarEl = document.getElementById('portionControlBar');
-        const categoryTabsEl = document.getElementById('categoryTabs');
-        const toggleBtn = document.getElementById('toggleManagePresetsBtn');
-
-        toggleBtn.classList.toggle('active', isManagePresetsMode);
-        toggleBtn.textContent = isManagePresetsMode ? '完成管理' : '管理快捷';
-
-        if (!isManagePresetsMode) {
-          gridEl.style.display = 'grid';
-          portionBarEl.style.display = 'flex';
-          categoryTabsEl.style.display = 'flex';
-          manageAreaEl.style.display = 'none';
-
-          renderCategoryTabs();
-
-          const filtered = selectedCategory === '全部'
-            ? presets
-            : presets.filter(p => (p.category || '超商') === selectedCategory);
-
-          gridEl.innerHTML = '';
-          if (filtered.length === 0) {
-            gridEl.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1; padding: 18px;">此分類目前尚無快捷品項，可點擊右上角「管理快捷」新增。</div>`;
-            return;
-          }
-
-          filtered.forEach(p => {
-            const calcKcal = roundNum(p.kcal * selectedMultiplier);
-            const calcProtein = roundNum(p.protein * selectedMultiplier);
-            const showCatBadge = selectedCategory === '全部' && p.category;
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'preset-btn';
-            btn.innerHTML = `
-              <div class="preset-top">
-                <div class="preset-name">${escapeHtml(p.name)}</div>
-                ${showCatBadge ? `<span class="preset-cat-badge">${escapeHtml(p.category)}</span>` : ''}
-              </div>
-              <div class="preset-macros">${calcKcal} kcal · <span class="p-highlight">${calcProtein}g 蛋白</span></div>
-            `;
-            btn.addEventListener('click', () => handleQuickAdd(p));
-            gridEl.appendChild(btn);
-          });
-        } else {
-          gridEl.style.display = 'none';
-          portionBarEl.style.display = 'none';
-          categoryTabsEl.style.display = 'none';
-          manageAreaEl.style.display = 'block';
-
-          const listEl = document.getElementById('managePresetList');
-          listEl.innerHTML = '';
-
-          presets.forEach((p, idx) => {
-            const row = document.createElement('div');
-            row.className = 'manage-item';
-            row.innerHTML = `
-              <div class="manage-item-info">
-                <div class="manage-item-title">
-                  <span class="preset-cat-badge" style="margin-right: 4px;">${escapeHtml(p.category || '超商')}</span>
-                  ${escapeHtml(p.name)}
-                </div>
-                <div class="manage-item-sub">${p.kcal} kcal · ${p.protein}g 蛋白質</div>
-              </div>
-              <div class="manage-item-actions">
-                <button type="button" class="mini-icon-btn" data-action="up" title="上移" ${idx === 0 ? 'disabled style="opacity:0.35"' : ''}>↑</button>
-                <button type="button" class="mini-icon-btn" data-action="down" title="下移" ${idx === presets.length - 1 ? 'disabled style="opacity:0.35"' : ''}>↓</button>
-                <button type="button" class="mini-icon-btn" data-action="edit" title="編輯">✎</button>
-                <button type="button" class="mini-icon-btn danger" data-action="delete" title="刪除">✕</button>
-              </div>
-            `;
-
-            row.querySelector('[data-action="up"]').addEventListener('click', () => movePreset(idx, -1));
-            row.querySelector('[data-action="down"]').addEventListener('click', () => movePreset(idx, 1));
-            row.querySelector('[data-action="edit"]').addEventListener('click', () => openPresetModal(p));
-            row.querySelector('[data-action="delete"]').addEventListener('click', () => deletePreset(p.id));
-
-            listEl.appendChild(row);
-          });
-        }
-      }
-
-      function renderMealSelector() {
-        const chips = document.querySelectorAll('#mealSelectorGroup .meal-chip');
-        chips.forEach(chip => {
-          chip.classList.toggle('active', chip.getAttribute('data-meal') === selectedManualMeal);
-        });
-      }
-
-      function renderTimeline() {
-        const log = getDayLog(currentDateStr);
-        const listEl = document.getElementById('timelineList');
-        document.getElementById('logCountBadge').textContent = `${log.items.length} 筆`;
-
-        if (log.items.length === 0) {
-          listEl.innerHTML = `<div class="empty-state">尚無飲食紀錄，點擊上方快捷按鈕或手動輸入開始追蹤！</div>`;
-          return;
-        }
-
-        listEl.innerHTML = '';
-        log.items.forEach(item => {
-          const row = document.createElement('div');
-          row.className = 'log-item';
-          const catBadgeHtml = item.category
-            ? `<span class="cat-tag">${escapeHtml(item.category)}</span>`
-            : '';
-          row.innerHTML = `
-            <div class="log-main">
-              <div class="log-top-row">
-                <span class="meal-tag ${escapeHtml(item.meal)}">${escapeHtml(item.meal)}</span>
-                ${catBadgeHtml}
-                <span class="log-time">${escapeHtml(item.time)}</span>
-              </div>
-              <div class="log-name">${escapeHtml(item.name)}</div>
-              <div class="log-macros">${item.kcal} kcal · ${item.protein}g 蛋白質</div>
-            </div>
-            <div class="log-actions">
-              <button type="button" class="repeat-btn" title="再吃一次 (+1)">+1</button>
-              <button type="button" class="delete-btn" title="刪除此筆紀錄" aria-label="刪除此筆紀錄">×</button>
-            </div>
-          `;
-
-          row.querySelector('.repeat-btn').addEventListener('click', () => repeatLogItem(item.id));
-          row.querySelector('.delete-btn').addEventListener('click', () => deleteLogItem(item.id));
-          listEl.appendChild(row);
-        });
-      }
-
-      function renderAll() {
-        applyTheme();
-        renderBackupStatus();
-        renderDateNav();
-        renderDashboard();
-        renderPortionBar();
-        renderPresets();
-        renderMealSelector();
-        renderTimeline();
-      }
-
-      // ========================================================================
-      // 6.5 月曆總覽渲染邏輯 (v5 新增)
-      // ========================================================================
-      function openCalendarModal() {
-        const [y, m] = currentDateStr.split('-').map(Number);
-        calendarViewYear = y;
-        calendarViewMonth = m;
-        renderCalendarModal();
-        document.getElementById('calendarModal').classList.add('open');
-      }
-
-      function closeCalendarModal() {
-        document.getElementById('calendarModal').classList.remove('open');
-      }
-
-      function shiftCalendarMonth(delta) {
-        let m = calendarViewMonth + delta;
-        let y = calendarViewYear;
-        if (m < 1) {
-          m = 12;
-          y -= 1;
-        } else if (m > 12) {
-          m = 1;
-          y += 1;
-        }
-        calendarViewYear = y;
-        calendarViewMonth = m;
-        renderCalendarModal();
-      }
-
-      function renderCalendarModal() {
-        const titleEl = document.getElementById('calMonthTitle');
-        const gridEl = document.getElementById('calGrid');
-        const loggedDaysEl = document.getElementById('calLoggedDaysText');
-        const avgKcalEl = document.getElementById('calAvgKcalText');
-
-        const year = calendarViewYear;
-        const month = calendarViewMonth;
-        const monthPad = String(month).padStart(2, '0');
-        titleEl.textContent = `${year}年 ${month}月`;
-
-        const firstWeekday = new Date(year, month - 1, 1).getDay(); // 0=日 ~ 6=六
-        const daysInMonth = new Date(year, month, 0).getDate();
-        const todayStr = getTodayDateStr();
-
-        let loggedDaysCount = 0;
-        let sumLoggedKcal = 0;
-
-        gridEl.innerHTML = '';
-
-        // 補齊月初空白格
-        for (let i = 0; i < firstWeekday; i++) {
-          const emptyCell = document.createElement('div');
-          emptyCell.className = 'cal-cell empty';
-          gridEl.appendChild(emptyCell);
-        }
-
-        // 渲染當月每一天
-        for (let day = 1; day <= daysInMonth; day++) {
-          const dayPad = String(day).padStart(2, '0');
-          const dateStr = `${year}-${monthPad}-${dayPad}`;
-          const raw = localStorage.getItem(STORAGE_KEYS.LOG_PREFIX + dateStr);
-
-          let hasData = false;
-          let totalKcal = 0;
-          let totalProtein = 0;
-          let targetKcal = settings.targetKcal;
-          let targetProtein = settings.targetProtein;
-
-          if (raw) {
-            try {
-              const parsed = JSON.parse(raw);
-              if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
-                hasData = true;
-                targetKcal = Number(parsed.targetKcal) || settings.targetKcal;
-                targetProtein = Number(parsed.targetProtein) || settings.targetProtein;
-                totalKcal = Math.round(parsed.items.reduce((s, it) => s + (Number(it.kcal) || 0), 0));
-                totalProtein = roundNum(parsed.items.reduce((s, it) => s + (Number(it.protein) || 0), 0));
-                loggedDaysCount++;
-                sumLoggedKcal += totalKcal;
-              }
-            } catch (e) { /* 略過損毀資料 */ }
-          }
-
-          const cell = document.createElement('button');
-          cell.type = 'button';
-          cell.className = 'cal-cell';
-          if (dateStr === todayStr) cell.classList.add('is-today');
-          if (dateStr === currentDateStr) cell.classList.add('is-selected');
-
-          let dotHtml = '';
-          let statsHtml = '';
-          if (hasData) {
-            let dotClass = 'blue';
-            if (totalKcal > targetKcal) {
-              dotClass = 'red';
-            } else if (totalProtein >= targetProtein) {
-              dotClass = 'green';
-            }
-            dotHtml = `<span class="cal-dot ${dotClass}"></span>`;
-            statsHtml = `
-              <span class="cal-kcal">${totalKcal}</span>
-              <span class="cal-protein">${totalProtein}g</span>
-            `;
-          }
-
-          cell.innerHTML = `
-            <div class="cal-day-top">
-              <span class="cal-day-num">${day}</span>
-              ${dotHtml}
-            </div>
-            ${statsHtml}
-          `;
-
-          cell.addEventListener('click', () => {
-            currentDateStr = dateStr;
-            closeCalendarModal();
-            renderAll();
-          });
-
-          gridEl.appendChild(cell);
-        }
-
-        loggedDaysEl.textContent = `${loggedDaysCount} 天`;
-        const avgKcal = loggedDaysCount > 0 ? Math.round(sumLoggedKcal / loggedDaysCount) : 0;
-        avgKcalEl.textContent = `${avgKcal} kcal`;
-      }
-
-      // ========================================================================
-      // 7. 快捷食物管理邏輯 (新增 / 編輯 / 排序 / 刪除)
-      // ========================================================================
-      function movePreset(index, direction) {
-        const targetIdx = index + direction;
-        if (targetIdx < 0 || targetIdx >= presets.length) return;
-        const temp = presets[index];
-        presets[index] = presets[targetIdx];
-        presets[targetIdx] = temp;
-        savePresets();
-        renderPresets();
-      }
-
-      function deletePreset(id) {
-        presets = presets.filter(p => p.id !== id);
-        savePresets();
-        renderPresets();
-        showToast('已刪除快捷食物');
-      }
-
-      function populateCategoryDropdown(currentCat) {
-        const selectEl = document.getElementById('presetCategorySelect');
-        const customGroup = document.getElementById('customCategoryGroup');
-        const customInput = document.getElementById('presetCustomCategoryInput');
-
-        const allCats = new Set(BASE_CATEGORIES);
-        presets.forEach(p => {
-          if (p.category) allCats.add(p.category);
-        });
-
-        selectEl.innerHTML = '';
-        allCats.forEach(cat => {
-          const opt = document.createElement('option');
-          opt.value = cat;
-          opt.textContent = cat;
-          selectEl.appendChild(opt);
-        });
-
-        const customOpt = document.createElement('option');
-        customOpt.value = '__custom__';
-        customOpt.textContent = '＋ 自訂新分類...';
-        selectEl.appendChild(customOpt);
-
-        if (currentCat && allCats.has(currentCat)) {
-          selectEl.value = currentCat;
-          customGroup.style.display = 'none';
-          customInput.value = '';
-        } else if (currentCat) {
-          selectEl.value = '__custom__';
-          customGroup.style.display = 'flex';
-          customInput.value = currentCat;
-        } else {
-          selectEl.value = '超商';
-          customGroup.style.display = 'none';
-          customInput.value = '';
-        }
-      }
-
-      function openPresetModal(preset = null) {
-        const modal = document.getElementById('presetModal');
-        const titleEl = document.getElementById('presetModalTitle');
-        const idInput = document.getElementById('editPresetIdInput');
-        const nameInput = document.getElementById('presetNameInput');
-        const kcalInput = document.getElementById('presetKcalInput');
-        const proteinInput = document.getElementById('presetProteinInput');
-
-        if (preset) {
-          titleEl.textContent = '編輯快捷食物';
-          idInput.value = preset.id;
-          populateCategoryDropdown(preset.category || '超商');
-          nameInput.value = preset.name;
-          kcalInput.value = preset.kcal;
-          proteinInput.value = preset.protein;
-        } else {
-          titleEl.textContent = '新增快捷食物';
-          idInput.value = '';
-          const defaultCat = selectedCategory !== '全部' ? selectedCategory : '超商';
-          populateCategoryDropdown(defaultCat);
-          nameInput.value = '';
-          kcalInput.value = '';
-          proteinInput.value = '';
-        }
-
-        modal.classList.add('open');
-        nameInput.focus();
-      }
-
-      function closePresetModal() {
-        document.getElementById('presetModal').classList.remove('open');
-      }
-
-      function handleSavePreset() {
-        const id = document.getElementById('editPresetIdInput').value;
-        const selectVal = document.getElementById('presetCategorySelect').value;
-        const customCatVal = document.getElementById('presetCustomCategoryInput').value.trim();
-        const name = document.getElementById('presetNameInput').value.trim();
-        const kcal = roundNum(parseDecimalInput(document.getElementById('presetKcalInput').value));
-        const protein = roundNum(parseDecimalInput(document.getElementById('presetProteinInput').value));
-
-        const category = selectVal === '__custom__' ? customCatVal : selectVal;
-
-        if (!category) {
-          showToast('請選擇或輸入分類名稱');
-          return;
-        }
-        if (!name) {
-          showToast('請輸入食物名稱');
-          return;
-        }
-        if (isNaN(kcal) || kcal < 0 || isNaN(protein) || protein < 0) {
-          showToast('請輸入有效的熱量與蛋白質數值');
-          return;
-        }
-
-        if (id) {
-          const idx = presets.findIndex(p => p.id === id);
-          if (idx !== -1) {
-            presets[idx] = { id, category, name, kcal, protein };
-          }
-          showToast('已更新快捷食物');
-        } else {
-          presets.push({
-            id: 'preset_' + Date.now(),
-            category,
-            name,
-            kcal,
-            protein
-          });
-          showToast('已新增快捷食物');
-        }
-
-        savePresets();
-        closePresetModal();
-        renderPresets();
-      }
-
-      function resetToDefaultPresets() {
-        presets = DEFAULT_PRESETS.map(p => ({ ...p }));
-        savePresets();
-        localStorage.setItem(
-          STORAGE_KEYS.SEEN_BUILTIN_IDS,
-          JSON.stringify(DEFAULT_PRESETS.map(p => p.id))
-        );
-        localStorage.setItem(STORAGE_KEYS.PRESET_SCHEMA_VERSION, CURRENT_PRESET_SCHEMA_VERSION);
-        selectedCategory = '全部';
-        document.getElementById('resetConfirmModal').classList.remove('open');
-        renderPresets();
-        showToast(`已重置為內建 ${DEFAULT_PRESETS.length} 項預設分類菜單`);
-      }
-
-      function mergeLatestBuiltinPresets() {
-        const existingIds = new Set(presets.map(p => p.id));
-        const existingNames = new Set(presets.map(p => p.name));
-        let addedCount = 0;
-
-        DEFAULT_PRESETS.forEach(defItem => {
-          if (!existingIds.has(defItem.id) && !existingNames.has(defItem.name)) {
-            presets.push({ ...defItem });
-            addedCount++;
-          }
-        });
-
-        localStorage.setItem(
-          STORAGE_KEYS.SEEN_BUILTIN_IDS,
-          JSON.stringify(DEFAULT_PRESETS.map(p => p.id))
-        );
-
-        if (addedCount > 0) {
-          savePresets();
-          renderPresets();
-          showToast(`已成功合併 ${addedCount} 項最新內建菜單！`);
-        } else {
-          showToast('目前已包含所有最新內建菜單，無需重複合併');
-        }
-      }
-
-      // ========================================================================
-      // 8. 跨裝置與筆記整合 (Markdown 摘要複製 & JSON 備份/還原)
-      // ========================================================================
-      function copyMarkdownSummary() {
-        const log = getDayLog(currentDateStr);
-        const targetKcal = log.items.length > 0 ? log.targetKcal : settings.targetKcal;
-        const targetProtein = log.items.length > 0 ? log.targetProtein : settings.targetProtein;
-        const totalKcal = roundNum(log.items.reduce((s, i) => s + (Number(i.kcal) || 0), 0));
-        const totalProtein = roundNum(log.items.reduce((s, i) => s + (Number(i.protein) || 0), 0));
-
-        const kcalStatus = totalKcal <= targetKcal ? `剩餘 ${roundNum(targetKcal - totalKcal)} kcal` : `超出 ${roundNum(totalKcal - targetKcal)} kcal`;
-        const proteinStatus = totalProtein >= targetProtein ? '已達標 ✅' : `還差 ${roundNum(targetProtein - totalProtein)} g`;
-
-        let md = `### 🥗 飲食紀錄 (${currentDateStr})\n`;
-        md += `- **熱量**：${totalKcal} / ${targetKcal} kcal（${kcalStatus}）\n`;
-        md += `- **蛋白質**：${totalProtein} / ${targetProtein} g（${proteinStatus}）\n\n`;
-
-        if (log.items.length === 0) {
-          md += `_當日尚無飲食明細_\n`;
-        } else {
-          md += `| 時間/餐別 | 品項 | 熱量/蛋白 |\n`;
-          md += `| :--- | :--- | :--- |\n`;
-          // 依時間正序排列匯出較符合閱讀習慣
-          const ordered = [...log.items].reverse();
-          ordered.forEach(item => {
-            const safeName = item.name.replace(/\|/g, '/');
-            const catPrefix = item.category ? `[${item.category}] ` : '';
-            md += `| ${item.time} ${item.meal} | ${catPrefix}${safeName} | ${item.kcal} kcal / ${item.protein}g |\n`;
-          });
-        }
-
-        copyTextToClipboard(md);
-      }
-
-      function copyTextToClipboard(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-          const ok = document.execCommand('copy');
-          if (ok) {
-            showToast('已複製 Markdown 摘要，可直接貼入筆記！');
-          } else {
-            showToast('複製失敗，請手動選取複製');
-          }
-        } catch (err) {
-          showToast('瀏覽器不支援自動複製');
-        } finally {
-          document.body.removeChild(textarea);
-        }
-      }
-
-      function exportJsonBackup() {
-        const logs = {};
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith(STORAGE_KEYS.LOG_PREFIX)) {
-            const datePart = key.slice(STORAGE_KEYS.LOG_PREFIX.length);
-            try {
-              logs[datePart] = JSON.parse(localStorage.getItem(key));
-            } catch (e) { /* 略過損毀鍵 */ }
-          }
-        }
-
-        const payload = {
-          app: 'Pure Nutrition Tracker',
-          version: 1,
-          exportedAt: new Date().toISOString(),
-          settings,
-          presets,
-          logs
-        };
-
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `pure-nutrition-backup-${getTodayDateStr()}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        settings.lastBackupAt = Date.now();
-        saveSettings();
-        renderBackupStatus();
-        showToast('已匯出 JSON 備份檔案');
-      }
-
-      function handleImportJsonFile(event) {
-        const file = event.target.files && event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          try {
-            const data = JSON.parse(e.target.result);
-            if (!data || typeof data !== 'object' || !data.logs) {
-              showToast('檔案格式錯誤：非有效的 Pure Nutrition 備份檔');
-              return;
-            }
-
-            if (data.settings && typeof data.settings === 'object') {
-              settings = { ...settings, ...data.settings };
-              saveSettings();
-            }
-
-            if (Array.isArray(data.presets) && data.presets.length > 0) {
-              presets = data.presets.map(p => ({
-                ...p,
-                category: (p.category && String(p.category).trim()) ? String(p.category).trim() : '超商'
-              }));
-              savePresets();
-            }
-
-            let importedDays = 0;
-            Object.keys(data.logs).forEach(dateKey => {
-              if (/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
-                saveDayLog(dateKey, data.logs[dateKey]);
-                importedDays++;
-              }
-            });
-
-            renderAll();
-            showToast(`成功還原 ${importedDays} 天的歷史飲食紀錄！`);
-          } catch (err) {
-            showToast('解析 JSON 檔案失敗，請確認檔案未損毀');
-          } finally {
-            event.target.value = '';
-          }
-        };
-        reader.readAsText(file);
-      }
-
-      // ========================================================================
-      // 9. 通知提示條 (Toast & Toast Undo) 與安全跳脫
-      // ========================================================================
-      let activeToastTimer = null;
-
-      function showToast(message, withUndo = false) {
-        const container = document.getElementById('toastContainer');
-        container.innerHTML = '';
-        if (activeToastTimer) {
-          clearTimeout(activeToastTimer);
-          activeToastTimer = null;
-        }
-
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-
-        const textSpan = document.createElement('span');
-        textSpan.textContent = message;
-        toast.appendChild(textSpan);
-
-        if (withUndo) {
-          const undoBtn = document.createElement('button');
-          undoBtn.type = 'button';
-          undoBtn.className = 'toast-undo-btn';
-          undoBtn.textContent = '點擊復原';
-          undoBtn.addEventListener('click', () => {
-            container.innerHTML = '';
-            undoLastDelete();
-          });
-          toast.appendChild(undoBtn);
-        }
-
-        container.appendChild(toast);
-
-        activeToastTimer = setTimeout(() => {
-          if (container.contains(toast)) {
-            container.removeChild(toast);
-          }
-          if (withUndo) {
-            undoBuffer = null;
-          }
-        }, withUndo ? 3500 : 2400);
+      function parseDecimalInput(raw) {
+        if (raw === null || raw === undefined) return NaN;
+        const normalized = String(raw).trim().replace(/,/g, '.');
+        return normalized === '' ? NaN : Number(normalized);
       }
 
       function escapeHtml(str) {
@@ -2685,208 +1778,855 @@
           .replace(/'/g, '&#39;');
       }
 
-      // ========================================================================
-      // 10. 事件監聽器綁定
-      // ========================================================================
-      function bindEvents() {
-        // 月曆總覽 Modal 控制 (v5 新增)
-        document.getElementById('openCalendarBtn').addEventListener('click', openCalendarModal);
-        document.getElementById('closeCalendarModalBtn').addEventListener('click', closeCalendarModal);
-        document.getElementById('calPrevMonthBtn').addEventListener('click', () => shiftCalendarMonth(-1));
-        document.getElementById('calNextMonthBtn').addEventListener('click', () => shiftCalendarMonth(1));
+      // ======================================================================
+      // 4. 飲食紀錄增刪與 Undo 復原邏輯
+      // ======================================================================
+      function addLogEntry({ name, cal, pro, meal }) {
+        const logs = getLogsForDate(selectedDate);
+        const resolvedMeal = (!meal || meal === '自動') ? detectMealByTime() : normalizeMealName(meal);
+        const newEntry = {
+          id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          name: (name || '').trim() || '外食紀錄',
+          cal: round1(Number(cal) || 0),
+          pro: round1(Number(pro) || 0),
+          meal: resolvedMeal,
+          time: getCurrentHHMM()
+        };
+        logs.unshift(newEntry);
+        saveLogsForDate(selectedDate, logs);
+        renderApp();
+        return newEntry;
+      }
 
-        // 深淺色模式切換
-        document.getElementById('themeToggleBtn').addEventListener('click', () => {
-          settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
-          saveSettings();
-          applyTheme();
+      function removeLogEntry(entryId) {
+        const logs = getLogsForDate(selectedDate);
+        const idx = logs.findIndex(item => item.id === entryId);
+        if (idx === -1) return;
+
+        const [deleted] = logs.splice(idx, 1);
+        saveLogsForDate(selectedDate, logs);
+        renderApp();
+
+        lastDeletedBackup = { dateStr: selectedDate, entry: deleted, index: idx };
+        showToast(`已刪除「${deleted.name}」`, true);
+      }
+
+      function undoRemoveLogEntry() {
+        if (!lastDeletedBackup) return;
+        const { dateStr, entry, index } = lastDeletedBackup;
+        const logs = getLogsForDate(dateStr);
+        logs.splice(Math.min(index, logs.length), 0, entry);
+        saveLogsForDate(dateStr, logs);
+        lastDeletedBackup = null;
+        selectedDate = dateStr;
+        renderApp();
+        showToast(`已復原「${entry.name}」`);
+      }
+
+      // ======================================================================
+      // 5. 外觀主題控制 (System / Light / Dark)
+      // ======================================================================
+      const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+      function syncTheme() {
+        const mode = settings.theme || 'system';
+        const isDark = mode === 'dark' || (mode === 'system' && darkMediaQuery.matches);
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+
+        document.querySelectorAll('#themeSegControl .theme-seg-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-theme-mode') === mode);
         });
+      }
 
-        // 日期切換導航
-        document.getElementById('prevDayBtn').addEventListener('click', () => {
-          currentDateStr = shiftDateStr(currentDateStr, -1);
-          renderAll();
-        });
+      darkMediaQuery.addEventListener('change', () => {
+        if (settings.theme === 'system') syncTheme();
+      });
 
-        document.getElementById('nextDayBtn').addEventListener('click', () => {
-          currentDateStr = shiftDateStr(currentDateStr, 1);
-          renderAll();
-        });
+      // ======================================================================
+      // 6. UI 渲染管線 (Header, Hero Bento, 7-Day Sparkline, Quick Grid, Timeline)
+      // ======================================================================
+      function renderHeader() {
+        const today = getTodayStr();
+        const yesterday = addDays(today, -1);
+        const [y, m, d] = selectedDate.split('-').map(Number);
+        const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+        const w = weekdays[new Date(y, m - 1, d).getDay()];
 
-        document.getElementById('backToTodayBtn').addEventListener('click', () => {
-          currentDateStr = getTodayDateStr();
-          renderAll();
-        });
+        document.getElementById('headerDateText').textContent = `${m}/${d} (${w})`;
+        document.getElementById('nativeDateInput').value = selectedDate;
 
-        document.getElementById('dateDisplayBtn').addEventListener('click', () => {
-          const picker = document.getElementById('datePickerInput');
-          if (typeof picker.showPicker === 'function') {
-            picker.showPicker();
+        const relBadge = document.getElementById('headerRelBadge');
+        const jumpBtn = document.getElementById('jumpTodayBtn');
+
+        if (selectedDate === today) {
+          relBadge.textContent = '今天';
+          relBadge.style.display = 'inline-block';
+          jumpBtn.style.display = 'none';
+        } else if (selectedDate === yesterday) {
+          relBadge.textContent = '昨天';
+          relBadge.style.display = 'inline-block';
+          jumpBtn.style.display = 'inline-flex';
+        } else {
+          relBadge.style.display = 'none';
+          jumpBtn.style.display = 'inline-flex';
+        }
+      }
+
+      function renderBentoDashboard() {
+        const logs = getLogsForDate(selectedDate);
+        const calGoal = settings.calGoal;
+        const proGoal = settings.proGoal;
+
+        const consumedCal = round1(logs.reduce((acc, item) => acc + item.cal, 0));
+        const consumedPro = round1(logs.reduce((acc, item) => acc + item.pro, 0));
+
+        // 1. Hero 主熱量卡 & 108px SVG 環形進度圖
+        const remainingCal = round1(calGoal - consumedCal);
+        const calRatio = calGoal > 0 ? consumedCal / calGoal : 0;
+        const calPct = Math.round(calRatio * 100);
+
+        const calLabelEl = document.getElementById('heroCalLabel');
+        const calBadgeEl = document.getElementById('heroCalBadge');
+        const calBigNumEl = document.getElementById('heroCalBigNum');
+        const ringArcEl = document.getElementById('heroRingArc');
+
+        calBadgeEl.className = 'cal-status-pill';
+        calBigNumEl.className = 'hero-remaining-num tabular';
+
+        if (remainingCal >= 0) {
+          calLabelEl.textContent = '剩餘可攝取';
+          calBigNumEl.innerHTML = `${fmtNum(remainingCal)} <span class="hero-kcal-unit">kcal</span>`;
+          if (calRatio >= 0.9) {
+            calBadgeEl.textContent = '接近上限';
+            calBadgeEl.classList.add('warn');
+            ringArcEl.style.stroke = 'var(--accent-warn)';
           } else {
-            picker.click();
+            calBadgeEl.textContent = '尚可攝取';
+            ringArcEl.style.stroke = 'var(--accent-cal)';
           }
-        });
+        } else {
+          calLabelEl.textContent = '今日已超出';
+          calBigNumEl.innerHTML = `${fmtNum(Math.abs(remainingCal))} <span class="hero-kcal-unit">kcal</span>`;
+          calBigNumEl.classList.add('is-over');
+          calBadgeEl.textContent = '超出預算';
+          calBadgeEl.classList.add('over');
+          ringArcEl.style.stroke = 'var(--accent-over)';
+        }
 
-        document.getElementById('datePickerInput').addEventListener('change', (e) => {
-          if (e.target.value) {
-            currentDateStr = e.target.value;
-            renderAll();
-          }
-        });
+        document.getElementById('heroConsumedNum').textContent = fmtNum(consumedCal);
+        document.getElementById('heroGoalNum').textContent = fmtNum(calGoal);
 
-        // 份量倍率切換
-        document.querySelectorAll('#portionControlBar .portion-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            selectedMultiplier = Number(btn.getAttribute('data-mult'));
-            renderPortionBar();
-            renderPresets();
+        // SVG r=44 -> 周長 = 2 * PI * 44 ≈ 276.46
+        const circumference = 276.46;
+        const clamped = Math.min(1, Math.max(0, calRatio));
+        ringArcEl.style.strokeDashoffset = String(circumference * (1 - clamped));
+        document.getElementById('heroRingPct').textContent = `${calPct}%`;
+
+        // 2. 左側 60% 蛋白質達成率卡片
+        const proRatio = proGoal > 0 ? consumedPro / proGoal : 0;
+        const proPct = Math.round(proRatio * 100);
+        const proRemain = round1(proGoal - consumedPro);
+
+        document.getElementById('proPctChip').textContent = `${proPct}%`;
+        document.getElementById('proCurrentNum').textContent = fmtNum(consumedPro);
+        document.getElementById('proGoalNum').textContent = fmtNum(proGoal);
+        document.getElementById('proBarFill').style.width = `${Math.min(100, proPct)}%`;
+
+        const proRemainEl = document.getElementById('proRemainText');
+        if (proRemain <= 0) {
+          const extra = Math.abs(proRemain);
+          proRemainEl.textContent = extra > 0 ? `已達標 · 超出 ${fmtNum(extra)}g` : '已達成今日蛋白質目標！';
+          proRemainEl.className = 'pro-remain-caption hit tabular';
+        } else {
+          proRemainEl.textContent = `還差 ${fmtNum(proRemain)}g 達標`;
+          proRemainEl.className = 'pro-remain-caption tabular';
+        }
+
+        // 3. 右側 40% 近 7 日熱量趨勢 Sparkline
+        renderSevenDaySparkline(calGoal);
+      }
+
+      function renderSevenDaySparkline(calGoal) {
+        const svgEl = document.getElementById('sparklineSvg');
+        const axisEl = document.getElementById('sparkAxisRow');
+        const avgEl = document.getElementById('sparkAvgLabel');
+
+        const daysData = [];
+        let sumLoggedCal = 0;
+        let loggedDaysCount = 0;
+
+        for (let offset = -6; offset <= 0; offset++) {
+          const dStr = addDays(selectedDate, offset);
+          const logs = getLogsForDate(dStr);
+          const dayCal = round1(logs.reduce((s, i) => s + i.cal, 0));
+          daysData.push({
+            dateStr: dStr,
+            dayNum: Number(dStr.split('-')[2]),
+            cal: dayCal,
+            hasLogs: logs.length > 0,
+            isSelected: offset === 0
           });
+          if (logs.length > 0) {
+            sumLoggedCal += dayCal;
+            loggedDaysCount++;
+          }
+        }
+
+        const avgCal = loggedDaysCount > 0 ? Math.round(sumLoggedCal / loggedDaysCount) : 0;
+        avgEl.textContent = `均 ${avgCal}`;
+
+        const maxVal = Math.max(calGoal * 1.15, ...daysData.map(d => d.cal), 600);
+        const svgW = 140;
+        const svgH = 66;
+        const barW = 11;
+        const gap = (svgW - barW * 7) / 6;
+        const goalLineY = svgH - Math.min(svgH - 4, (calGoal / maxVal) * (svgH - 8));
+
+        let markup = `
+          <line x1="0" y1="${goalLineY.toFixed(1)}" x2="${svgW}" y2="${goalLineY.toFixed(1)}"
+            stroke="var(--ink-tertiary)" stroke-width="1" stroke-dasharray="2.5,2.5" opacity="0.5" />
+        `;
+
+        axisEl.innerHTML = '';
+
+        daysData.forEach((d, idx) => {
+          const x = idx * (barW + gap);
+          const h = d.cal > 0 ? Math.max(5, (d.cal / maxVal) * (svgH - 8)) : 3;
+          const y = svgH - h;
+
+          let fill = 'var(--bg-subtle)';
+          if (d.cal > 0) {
+            if (d.cal > calGoal) {
+              fill = 'var(--accent-over)';
+            } else if (d.isSelected) {
+              fill = 'var(--accent-cal)';
+            } else {
+              fill = 'var(--accent-pro)';
+            }
+          } else if (d.isSelected) {
+            fill = 'var(--accent-cal-soft)';
+          }
+
+          markup += `
+            <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW}" height="${h.toFixed(1)}"
+              rx="4" fill="${fill}" />
+          `;
+
+          const lbl = document.createElement('span');
+          lbl.textContent = d.dayNum;
+          if (d.isSelected) lbl.className = 'active-day';
+          axisEl.appendChild(lbl);
         });
 
-        // 快捷餐別手動覆寫切換
-        document.querySelectorAll('#quickMealControlBar .quick-meal-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            selectedQuickMeal = btn.getAttribute('data-qmeal');
-            renderPortionBar();
-          });
-        });
+        svgEl.innerHTML = markup;
+      }
 
-        // 管理快捷模式切換
-        document.getElementById('toggleManagePresetsBtn').addEventListener('click', () => {
-          isManagePresetsMode = !isManagePresetsMode;
-          renderPresets();
-        });
-
-        document.getElementById('openAddPresetBtn').addEventListener('click', () => openPresetModal(null));
-        document.getElementById('mergeLatestPresetsBtn').addEventListener('click', mergeLatestBuiltinPresets);
-        document.getElementById('closePresetModalBtn').addEventListener('click', closePresetModal);
-        document.getElementById('cancelPresetModalBtn').addEventListener('click', closePresetModal);
-        document.getElementById('savePresetBtn').addEventListener('click', handleSavePreset);
-
-        // 分類下拉選單切換「自訂新分類」輸入框顯示
-        document.getElementById('presetCategorySelect').addEventListener('change', (e) => {
-          const customGroup = document.getElementById('customCategoryGroup');
-          const customInput = document.getElementById('presetCustomCategoryInput');
-          if (e.target.value === '__custom__') {
-            customGroup.style.display = 'flex';
-            customInput.focus();
-          } else {
-            customGroup.style.display = 'none';
+      function renderQuickLogModule() {
+        const autoMeal = detectMealByTime();
+        document.querySelectorAll('#mealSelectorStrip .meal-selector-pill').forEach(btn => {
+          const meal = btn.getAttribute('data-meal');
+          btn.classList.toggle('active', meal === activeMealOverride);
+          if (meal === '自動') {
+            btn.textContent = `自動·${autoMeal}`;
           }
         });
 
-        // 重置預設菜單確認視窗
-        const resetModal = document.getElementById('resetConfirmModal');
-        document.getElementById('resetDefaultPresetsBtn').addEventListener('click', () => {
-          resetModal.classList.add('open');
-        });
-        document.getElementById('closeResetModalBtn').addEventListener('click', () => resetModal.classList.remove('open'));
-        document.getElementById('cancelResetBtn').addEventListener('click', () => resetModal.classList.remove('open'));
-        document.getElementById('confirmResetBtn').addEventListener('click', resetToDefaultPresets);
+        document.getElementById('manualMealTagHint').textContent =
+          activeMealOverride === '自動' ? `手動輸入 · 自動歸類 (${autoMeal})` : `手動輸入 · 指定 (${activeMealOverride})`;
 
-        // 手動輸入表單餐別選擇
-        document.querySelectorAll('#mealSelectorGroup .meal-chip').forEach(chip => {
+        // 分類膠囊列
+        const catBar = document.getElementById('categoryChipsBar');
+        catBar.innerHTML = '';
+        CATEGORIES.forEach(cat => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'cat-pill-btn' + (cat === activeCategory ? ' active' : '');
+          chip.textContent = cat;
           chip.addEventListener('click', () => {
-            selectedManualMeal = chip.getAttribute('data-meal');
-            renderMealSelector();
+            activeCategory = cat;
+            renderQuickLogModule();
           });
+          catBar.appendChild(chip);
+        });
+
+        // 2 欄 Bento 快捷食物卡片
+        const grid = document.getElementById('bentoFoodGrid');
+        grid.innerHTML = '';
+
+        const filtered = activeCategory === '全部'
+          ? presets
+          : presets.filter(p => p.category === activeCategory);
+
+        filtered.forEach(item => {
+          const card = document.createElement('button');
+          card.type = 'button';
+          card.className = 'quick-food-card';
+          card.innerHTML = `
+            <div class="quick-food-top">
+              <span class="quick-food-name">${escapeHtml(item.name)}</span>
+              <span class="quick-cat-tag">${escapeHtml(item.category)}</span>
+            </div>
+            <div class="quick-food-macros tabular">
+              <span>${fmtNum(item.cal)} kcal</span>
+              <span>·</span>
+              <span class="pro-macro-highlight">${fmtNum(item.pro)}g P</span>
+            </div>
+          `;
+          card.addEventListener('click', () => {
+            const added = addLogEntry({
+              name: item.name,
+              cal: item.cal,
+              pro: item.pro,
+              meal: activeMealOverride
+            });
+            showToast(`已記錄[${added.meal}] ${added.name} (+${added.cal} kcal)`);
+          });
+          grid.appendChild(card);
+        });
+      }
+
+      function renderTimelineSection() {
+        const logs = getLogsForDate(selectedDate);
+        const container = document.getElementById('timelineGroupsContainer');
+        document.getElementById('timelineCountBadge').textContent = `${logs.length} 筆`;
+
+        if (logs.length === 0) {
+          container.innerHTML = `<div class="empty-timeline-box">尚無飲食紀錄，點擊上方快捷方塊即可一秒記錄</div>`;
+          return;
+        }
+
+        const mealSequence = ['早餐', '午餐', '晚餐', '點心'];
+        const mealTitles = {
+          '早餐': '🌅 早餐',
+          '午餐': '☀️ 午餐',
+          '晚餐': '🌙 晚餐',
+          '點心': '☕ 點心'
+        };
+
+        const grouped = { '早餐': [], '午餐': [], '晚餐': [], '點心': [] };
+        logs.forEach(entry => {
+          grouped[normalizeMealName(entry.meal)].push(entry);
+        });
+
+        container.innerHTML = '';
+        mealSequence.forEach(mealKey => {
+          const entries = grouped[mealKey];
+          if (entries.length === 0) return;
+
+          const subCal = round1(entries.reduce((s, e) => s + e.cal, 0));
+          const subPro = round1(entries.reduce((s, e) => s + e.pro, 0));
+
+          const section = document.createElement('div');
+          section.className = 'meal-section-group';
+          section.innerHTML = `
+            <div class="meal-section-head">
+              <span>${mealTitles[mealKey]}</span>
+              <span class="meal-section-sum tabular">${fmtNum(subCal)} kcal · ${fmtNum(subPro)}g P</span>
+            </div>
+          `;
+
+          const card = document.createElement('div');
+          card.className = 'meal-items-card';
+
+          entries.forEach(entry => {
+            const row = document.createElement('div');
+            row.className = 'timeline-row';
+            row.innerHTML = `
+              <div class="timeline-row-main">
+                <div class="timeline-item-name">${escapeHtml(entry.name)}</div>
+                <div class="timeline-item-meta tabular">
+                  <span>${escapeHtml(entry.time)}</span>
+                  <span>·</span>
+                  <span>${fmtNum(entry.cal)} kcal</span>
+                  <span>·</span>
+                  <span style="color: var(--accent-pro-ink);">${fmtNum(entry.pro)}g P</span>
+                </div>
+              </div>
+              <div class="timeline-row-btns">
+                <button type="button" class="dup-plus-btn" title="再記一筆">+1</button>
+                <button type="button" class="del-cross-btn" aria-label="刪除紀錄">×</button>
+              </div>
+            `;
+
+            row.querySelector('.dup-plus-btn').addEventListener('click', () => {
+              addLogEntry({
+                name: entry.name,
+                cal: entry.cal,
+                pro: entry.pro,
+                meal: mealKey
+              });
+              showToast(`已再記一筆：${entry.name}`);
+            });
+
+            row.querySelector('.del-cross-btn').addEventListener('click', () => removeLogEntry(entry.id));
+            card.appendChild(row);
+          });
+
+          section.appendChild(card);
+          container.appendChild(section);
+        });
+      }
+
+      function renderApp() {
+        syncTheme();
+        renderHeader();
+        renderBentoDashboard();
+        renderQuickLogModule();
+        renderTimelineSection();
+      }
+
+      // ======================================================================
+      // 7. 月曆總覽 Bottom Sheet 渲染
+      // ======================================================================
+      function openCalendarModal() {
+        const [y, m] = selectedDate.split('-').map(Number);
+        calMonthYear = y;
+        calMonthNum = m;
+        renderCalendarMatrix();
+        document.getElementById('calendarSheet').classList.add('open');
+      }
+
+      function renderCalendarMatrix() {
+        const monthStr = String(calMonthNum).padStart(2, '0');
+        document.getElementById('calMonthLabel').textContent = `${calMonthYear}年 ${calMonthNum}月`;
+
+        const firstWeekday = new Date(calMonthYear, calMonthNum - 1, 1).getDay();
+        const daysInMonth = new Date(calMonthYear, calMonthNum, 0).getDate();
+        const today = getTodayStr();
+        const grid = document.getElementById('calMatrixGrid');
+        grid.innerHTML = '';
+
+        let loggedDays = 0;
+        let totalMonthCal = 0;
+        let proHitDays = 0;
+
+        for (let i = 0; i < firstWeekday; i++) {
+          const blank = document.createElement('div');
+          blank.className = 'cal-cell blank';
+          grid.appendChild(blank);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dStr = `${calMonthYear}-${monthStr}-${String(d).padStart(2, '0')}`;
+          const logs = getLogsForDate(dStr);
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.className = 'cal-cell';
+          if (dStr === today) cell.classList.add('today-ring');
+          if (dStr === selectedDate) cell.classList.add('selected-day');
+
+          let dotMarkup = '';
+          let statsMarkup = '';
+
+          if (logs.length > 0) {
+            const calSum = Math.round(logs.reduce((s, e) => s + e.cal, 0));
+            const proSum = round1(logs.reduce((s, e) => s + e.pro, 0));
+            loggedDays++;
+            totalMonthCal += calSum;
+            if (proSum >= settings.proGoal) proHitDays++;
+
+            let dotClass = 'blue';
+            if (calSum > settings.calGoal) {
+              dotClass = 'rose';
+            } else if (proSum >= settings.proGoal) {
+              dotClass = 'emerald';
+            }
+
+            dotMarkup = `<span class="cal-dot ${dotClass}"></span>`;
+            statsMarkup = `
+              <span class="cal-cell-cal">${calSum}</span>
+              <span class="cal-cell-pro">${proSum}g</span>
+            `;
+          }
+
+          cell.innerHTML = `
+            <div class="cal-day-top">
+              <span>${d}</span>
+              ${dotMarkup}
+            </div>
+            ${statsMarkup}
+          `;
+
+          cell.addEventListener('click', () => {
+            selectedDate = dStr;
+            document.getElementById('calendarSheet').classList.remove('open');
+            renderApp();
+          });
+
+          grid.appendChild(cell);
+        }
+
+        document.getElementById('calStatLoggedDays').textContent = `${loggedDays} 天`;
+        document.getElementById('calStatAvgCal').textContent =
+          `${loggedDays > 0 ? Math.round(totalMonthCal / loggedDays).toLocaleString('en-US') : 0} kcal`;
+        document.getElementById('calStatProDays').textContent = `${proHitDays} 天`;
+      }
+
+      // ======================================================================
+      // 8. 設定、菜單管理與 JSON 備份/還原
+      // ======================================================================
+      function openSettingsModal() {
+        document.getElementById('goalCalInput').value = settings.calGoal;
+        document.getElementById('goalProInput').value = settings.proGoal;
+        renderManagePresets();
+        document.getElementById('settingsSheet').classList.add('open');
+      }
+
+      function renderManagePresets() {
+        const box = document.getElementById('managePresetList');
+        box.innerHTML = '';
+        presets.forEach(p => {
+          const row = document.createElement('div');
+          row.className = 'preset-item-row';
+          row.innerHTML = `
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-weight: 700; color: var(--ink-primary);">[${escapeHtml(p.category)}] ${escapeHtml(p.name)}</div>
+              <div class="tabular" style="font-size: 0.72rem; color: var(--ink-secondary);">${fmtNum(p.cal)} kcal · ${fmtNum(p.pro)}g P</div>
+            </div>
+            <button type="button" class="del-cross-btn" aria-label="移除項目">×</button>
+          `;
+          row.querySelector('button').addEventListener('click', () => {
+            presets = presets.filter(item => item.id !== p.id);
+            savePresets();
+            renderManagePresets();
+            renderQuickLogModule();
+            showToast(`已移除「${p.name}」`);
+          });
+          box.appendChild(row);
+        });
+      }
+
+      function exportJsonBackup() {
+        const allLogs = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(STORAGE_KEYS.LOG_PREFIX)) {
+            try {
+              allLogs[key] = JSON.parse(localStorage.getItem(key));
+            } catch (e) { /* 忽略 */ }
+          }
+        }
+
+        const payload = {
+          app: 'Pure Nutrition Tracker',
+          version: 'v7',
+          exportedAt: new Date().toISOString(),
+          pnt_settings: settings,
+          pnt_presets: presets,
+          logs: allLogs
+        };
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pure-nutrition-backup-${getTodayStr()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('已匯出 JSON 備份檔案');
+      }
+
+      function importJsonBackup(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const parsed = JSON.parse(e.target.result);
+            if (!parsed || typeof parsed !== 'object') {
+              showToast('無效的 JSON 備份檔案');
+              return;
+            }
+
+            const incomingSettings = parsed.pnt_settings || parsed.settings;
+            if (incomingSettings) {
+              settings.calGoal = Number(incomingSettings.calGoal ?? incomingSettings.targetKcal) || settings.calGoal;
+              settings.proGoal = Number(incomingSettings.proGoal ?? incomingSettings.targetProtein) || settings.proGoal;
+              if (incomingSettings.theme) settings.theme = incomingSettings.theme;
+              saveSettings();
+            }
+
+            const incomingPresets = parsed.pnt_presets || parsed.presets;
+            if (Array.isArray(incomingPresets)) {
+              presets = incomingPresets.map(p => ({
+                id: p.id || ('p_' + Math.random().toString(36).slice(2, 8)),
+                name: String(p.name || ''),
+                category: p.category || '自訂',
+                cal: Number(p.cal ?? p.kcal) || 0,
+                pro: Number(p.pro ?? p.protein) || 0
+              }));
+              savePresets();
+            }
+
+            let restoredDays = 0;
+            if (parsed.logs && typeof parsed.logs === 'object') {
+              Object.keys(parsed.logs).forEach(k => {
+                const dateKey = k.startsWith(STORAGE_KEYS.LOG_PREFIX) ? k : (STORAGE_KEYS.LOG_PREFIX + k);
+                if (/^pnt_logs_\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+                  const val = parsed.logs[k];
+                  const arr = Array.isArray(val) ? val : (Array.isArray(val.items) ? val.items : []);
+                  localStorage.setItem(dateKey, JSON.stringify(arr));
+                  restoredDays++;
+                }
+              });
+            }
+
+            renderApp();
+            renderManagePresets();
+            showToast(`已成功還原設定與 ${restoredDays} 天飲食紀錄`);
+          } catch (err) {
+            showToast('讀取備份檔失敗，請確認檔案格式');
+          } finally {
+            event.target.value = '';
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // ======================================================================
+      // 9. iOS 浮動 Toast + Undo 提示
+      // ======================================================================
+      let toastTimeout = null;
+
+      function showToast(message, showUndo = false) {
+        const area = document.getElementById('floatingToastArea');
+        area.innerHTML = '';
+        if (toastTimeout) clearTimeout(toastTimeout);
+
+        const banner = document.createElement('div');
+        banner.className = 'toast-banner';
+
+        const span = document.createElement('span');
+        span.textContent = message;
+        banner.appendChild(span);
+
+        if (showUndo) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'toast-undo-btn';
+          btn.textContent = '復原';
+          btn.addEventListener('click', () => {
+            area.innerHTML = '';
+            undoRemoveLogEntry();
+          });
+          banner.appendChild(btn);
+        }
+
+        area.appendChild(banner);
+        toastTimeout = setTimeout(() => {
+          if (area.contains(banner)) area.removeChild(banner);
+          if (showUndo) lastDeletedBackup = null;
+        }, showUndo ? 3600 : 2200);
+      }
+
+      // ======================================================================
+      // 10. 事件綁定
+      // ======================================================================
+      function bindEvents() {
+        // 頂部日期切換
+        document.getElementById('prevDayBtn').addEventListener('click', () => {
+          selectedDate = addDays(selectedDate, -1);
+          renderApp();
+        });
+        document.getElementById('nextDayBtn').addEventListener('click', () => {
+          selectedDate = addDays(selectedDate, 1);
+          renderApp();
+        });
+        document.getElementById('jumpTodayBtn').addEventListener('click', () => {
+          selectedDate = getTodayStr();
+          renderApp();
+        });
+        document.getElementById('datePickerBtn').addEventListener('click', () => {
+          const picker = document.getElementById('nativeDateInput');
+          if (typeof picker.showPicker === 'function') picker.showPicker();
+          else picker.click();
+        });
+        document.getElementById('nativeDateInput').addEventListener('change', (e) => {
+          if (e.target.value) {
+            selectedDate = e.target.value;
+            renderApp();
+          }
+        });
+
+        // 餐別選擇器
+        document.querySelectorAll('#mealSelectorStrip .meal-selector-pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            activeMealOverride = btn.getAttribute('data-meal');
+            renderQuickLogModule();
+          });
+        });
+
+        // 存為常用快捷開關
+        const savePresetToggleBtn = document.getElementById('saveAsPresetToggle');
+        savePresetToggleBtn.addEventListener('click', () => {
+          saveManualAsPreset = !saveManualAsPreset;
+          savePresetToggleBtn.classList.toggle('checked', saveManualAsPreset);
+          savePresetToggleBtn.setAttribute('aria-pressed', String(saveManualAsPreset));
+          savePresetToggleBtn.innerHTML = saveManualAsPreset
+            ? '<span>✓ 同時存為常用快捷</span>'
+            : '<span>＋ 存為常用快捷</span>';
         });
 
         // 手動輸入表單送出
-        document.getElementById('manualEntryForm').addEventListener('submit', (e) => {
+        document.getElementById('quickManualForm').addEventListener('submit', (e) => {
           e.preventDefault();
-          const nameInput = document.getElementById('foodNameInput');
-          const kcalInput = document.getElementById('foodKcalInput');
-          const proteinInput = document.getElementById('foodProteinInput');
+          const nameInput = document.getElementById('manualNameInput');
+          const calInput = document.getElementById('manualCalInput');
+          const proInput = document.getElementById('manualProInput');
 
-          const kcalVal = parseDecimalInput(kcalInput.value);
-          const proteinVal = parseDecimalInput(proteinInput.value);
+          const calVal = parseDecimalInput(calInput.value);
+          const proVal = parseDecimalInput(proInput.value);
 
-          if (kcalInput.value.trim() === '' || isNaN(kcalVal) || kcalVal < 0) {
-            showToast('請輸入有效的熱量數值');
-            kcalInput.focus();
+          if (isNaN(calVal) || calVal < 0) {
+            showToast('請輸入有效的熱量數字');
+            calInput.focus();
             return;
           }
-          if (proteinInput.value.trim() === '' || isNaN(proteinVal) || proteinVal < 0) {
-            showToast('請輸入有效的蛋白質數值');
-            proteinInput.focus();
+          if (isNaN(proVal) || proVal < 0) {
+            showToast('請輸入有效的蛋白質數字');
+            proInput.focus();
             return;
           }
 
-          const entry = addFoodEntry({
-            name: nameInput.value.trim() || '外食紀錄',
-            kcal: kcalVal,
-            protein: proteinVal,
-            meal: selectedManualMeal
+          const finalName = nameInput.value.trim() || '外食紀錄';
+          const entry = addLogEntry({
+            name: finalName,
+            cal: calVal,
+            pro: proVal,
+            meal: activeMealOverride
           });
+
+          if (saveManualAsPreset) {
+            const targetCat = activeCategory !== '全部' ? activeCategory : '自訂';
+            presets.push({
+              id: 'custom_' + Date.now(),
+              name: finalName,
+              category: targetCat,
+              cal: round1(calVal),
+              pro: round1(proVal)
+            });
+            savePresets();
+            renderQuickLogModule();
+          }
 
           nameInput.value = '';
-          kcalInput.value = '';
-          proteinInput.value = '';
-          selectedManualMeal = detectCurrentMealByTime();
-          renderMealSelector();
-          showToast(`已紀錄：${entry.name} (+${entry.kcal} kcal / +${entry.protein}g)`);
+          calInput.value = '';
+          proInput.value = '';
+          showToast(saveManualAsPreset
+            ? `已記錄並存入快捷：${entry.name}`
+            : `已記錄[${entry.meal}] ${entry.name} (+${entry.cal} kcal)`);
         });
 
-        // 目標設定 Modal
-        document.getElementById('openSettingsBtn').addEventListener('click', () => {
-          document.getElementById('settingKcalInput').value = settings.targetKcal;
-          document.getElementById('settingProteinInput').value = settings.targetProtein;
-          document.getElementById('settingsModal').classList.add('open');
+        // 月曆 Bottom Sheet
+        document.getElementById('openCalBtn').addEventListener('click', openCalendarModal);
+        document.getElementById('closeCalBtn').addEventListener('click', () => {
+          document.getElementById('calendarSheet').classList.remove('open');
+        });
+        document.getElementById('calPrevMonthBtn').addEventListener('click', () => {
+          calMonthNum--;
+          if (calMonthNum < 1) { calMonthNum = 12; calMonthYear--; }
+          renderCalendarMatrix();
+        });
+        document.getElementById('calNextMonthBtn').addEventListener('click', () => {
+          calMonthNum++;
+          if (calMonthNum > 12) { calMonthNum = 1; calMonthYear++; }
+          renderCalendarMatrix();
         });
 
-        const closeSettings = () => document.getElementById('settingsModal').classList.remove('open');
-        document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
-        document.getElementById('cancelSettingsBtn').addEventListener('click', closeSettings);
-
-        document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-          const newKcal = Math.round(parseDecimalInput(document.getElementById('settingKcalInput').value));
-          const newProtein = roundNum(parseDecimalInput(document.getElementById('settingProteinInput').value));
-
-          if (isNaN(newKcal) || newKcal < 300 || isNaN(newProtein) || newProtein < 10) {
-            showToast('請輸入合理的熱量上限與蛋白質目標');
-            return;
-          }
-
-          settings.targetKcal = newKcal;
-          settings.targetProtein = newProtein;
-          saveSettings();
-
-          // 若今日有紀錄，同步更新今日目標快照（歷史日期保持原快照不動）
-          const todayStr = getTodayDateStr();
-          const todayLog = getDayLog(todayStr);
-          if (todayLog.items.length > 0) {
-            todayLog.targetKcal = newKcal;
-            todayLog.targetProtein = newProtein;
-            saveDayLog(todayStr, todayLog);
-          }
-
-          closeSettings();
-          renderAll();
-          showToast('已更新每日目標設定');
+        // 設定 Bottom Sheet
+        document.getElementById('openSettingsBtn').addEventListener('click', openSettingsModal);
+        document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+          document.getElementById('settingsSheet').classList.remove('open');
         });
 
-        // 點擊 Modal 背景關閉
-        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-          backdrop.addEventListener('click', (e) => {
-            if (e.target === backdrop) {
-              backdrop.classList.remove('open');
-            }
+        document.querySelectorAll('#themeSegControl .theme-seg-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            settings.theme = btn.getAttribute('data-theme-mode');
+            saveSettings();
+            syncTheme();
           });
         });
 
-        // Markdown 複製與 JSON 備份/還原
-        document.getElementById('copyMarkdownBtn').addEventListener('click', copyMarkdownSummary);
-        document.getElementById('exportJsonBtn').addEventListener('click', exportJsonBackup);
-        document.getElementById('importJsonBtn').addEventListener('click', () => {
-          document.getElementById('importJsonInput').click();
+        document.getElementById('saveGoalSettingsBtn').addEventListener('click', () => {
+          const newCal = Math.round(parseDecimalInput(document.getElementById('goalCalInput').value));
+          const newPro = round1(parseDecimalInput(document.getElementById('goalProInput').value));
+          if (isNaN(newCal) || newCal < 300 || isNaN(newPro) || newPro < 10) {
+            showToast('請輸入合理的熱量與蛋白質目標');
+            return;
+          }
+          settings.calGoal = newCal;
+          settings.proGoal = newPro;
+          saveSettings();
+          renderApp();
+          showToast('已更新每日營養目標');
         });
-        document.getElementById('importJsonInput').addEventListener('change', handleImportJsonFile);
+
+        document.getElementById('addNewPresetBtn').addEventListener('click', () => {
+          const nameEl = document.getElementById('newPresetNameInput');
+          const catEl = document.getElementById('newPresetCatSelect');
+          const calEl = document.getElementById('newPresetCalInput');
+          const proEl = document.getElementById('newPresetProInput');
+
+          const name = nameEl.value.trim();
+          const cal = round1(parseDecimalInput(calEl.value));
+          const pro = round1(parseDecimalInput(proEl.value));
+
+          if (!name || isNaN(cal) || cal < 0 || isNaN(pro) || pro < 0) {
+            showToast('請完整填寫品項名稱、熱量與蛋白質');
+            return;
+          }
+
+          presets.push({
+            id: 'custom_' + Date.now(),
+            name,
+            category: catEl.value,
+            cal,
+            pro
+          });
+          savePresets();
+          nameEl.value = '';
+          calEl.value = '';
+          proEl.value = '';
+          renderManagePresets();
+          renderQuickLogModule();
+          showToast(`已新增快捷品項：${name}`);
+        });
+
+        document.getElementById('restoreDefaultPresetsBtn').addEventListener('click', () => {
+          const existingNames = new Set(presets.map(p => p.name));
+          let addedCount = 0;
+          DEFAULT_PRESETS.forEach(def => {
+            if (!existingNames.has(def.name)) {
+              presets.push({ ...def });
+              addedCount++;
+            }
+          });
+          savePresets();
+          renderManagePresets();
+          renderQuickLogModule();
+          showToast(addedCount > 0 ? `已補齊 ${addedCount} 項預設品項` : '目前已包含全部預設品項');
+        });
+
+        document.getElementById('exportBackupBtn').addEventListener('click', exportJsonBackup);
+        document.getElementById('importBackupBtn').addEventListener('click', () => {
+          document.getElementById('importBackupFile').click();
+        });
+        document.getElementById('importBackupFile').addEventListener('change', importJsonBackup);
+
+        // 點擊遮罩背景關閉 Bottom Sheet
+        document.querySelectorAll('.bottom-sheet-mask').forEach(mask => {
+          mask.addEventListener('click', (e) => {
+            if (e.target === mask) mask.classList.remove('open');
+          });
+        });
       }
 
-      // 啟動應用程式
+      // 啟動應用
       bindEvents();
-      renderAll();
+      renderApp();
     })();
   </script>
 </body>
