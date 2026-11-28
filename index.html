@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
   <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
-  <title>Pure Nutrition Tracker v10.0 — 個人健康與飲食儀表板</title>
+  <title>Pure Nutrition Tracker v10.0.1 — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
        1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
@@ -1528,6 +1528,25 @@
     .stats-label,.stats-note {font-size:.75rem;color:var(--ink-secondary);line-height:1.5;}
     .stats-value {font-size:1.35rem;font-weight:800;margin:4px 0;}
     .stats-chart svg {display:block;width:100%;height:auto;}
+    .bottom-sheet-card { overscroll-behavior-y: contain; }
+    .bottom-sheet-card > * { flex-shrink: 0; }
+    .bottom-sheet-card > .sheet-top-bar {
+      position: sticky;
+      top: -12px;
+      z-index: 10;
+      background: var(--bg-card);
+      padding: 12px 20px 10px;
+      margin: -12px -20px -10px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .sheet-dismiss-btn { flex-shrink: 0; }
+    @media (min-width: 560px) {
+      .bottom-sheet-card > .sheet-top-bar {
+        top: -22px;
+        padding: 22px 22px 10px;
+        margin: -22px -22px -10px;
+      }
+    }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
   <link rel="icon" type="image/png" href="./apple-touch-icon.png" />
@@ -1891,7 +1910,7 @@
           <button type="button" id="importBackupBtn" class="secondary-btn">📥 匯入 JSON 還原</button>
           <input type="file" id="importBackupFile" accept=".json,application/json" style="display: none;" />
         </div>
-        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V10.0</div>
+        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V10.0.1</div>
         <div class="backup-hint-box">
           資料皆安全儲存於此裝置本機空間。刪除主畫面書籤或更換手機前，請先匯出 JSON 備份。
         </div>
