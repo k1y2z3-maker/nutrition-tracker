@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
   <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
-  <title>Pure Nutrition Tracker v9.4 — 個人健康與飲食儀表板</title>
+  <title>Pure Nutrition Tracker v10.0 — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
        1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
@@ -1522,6 +1522,12 @@
     .protein-focus-card .pro-remain-caption { text-align: center; }
     .sparkline-card { min-width: 0; }
     .sparkline-card .spark-canvas-wrap { flex: 1; min-height: 68px; max-height: 125px; }
+    .stats-tabs,.stats-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0;}
+    .stats-tabs button.active {color:var(--accent-cal);border:1px solid var(--accent-cal);}
+    .stats-tile,.stats-chart {background:var(--bg-subtle);border-radius:14px;padding:12px;margin-bottom:8px;}
+    .stats-label,.stats-note {font-size:.75rem;color:var(--ink-secondary);line-height:1.5;}
+    .stats-value {font-size:1.35rem;font-weight:800;margin:4px 0;}
+    .stats-chart svg {display:block;width:100%;height:auto;}
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
   <link rel="icon" type="image/png" href="./apple-touch-icon.png" />
@@ -1760,6 +1766,15 @@
   </div>
 
   <!-- 3. 月曆總覽 Bottom Sheet Modal -->
+  <div id="statsSheet" class="bottom-sheet-mask" role="dialog" aria-modal="true" aria-labelledby="statsHeading">
+    <div class="bottom-sheet-card">
+      <div class="sheet-handle"></div>
+      <div class="sheet-top-bar"><h2 id="statsHeading" class="sheet-heading">營養統計</h2><button id="closeStatsBtn" type="button" class="sheet-dismiss-btn" aria-label="關閉統計">✕</button></div>
+      <div class="stats-tabs"><button type="button" id="statsWeek" class="secondary-btn">週統計</button><button type="button" id="statsMonth" class="secondary-btn">月統計</button></div>
+      <div class="cal-month-switcher"><button type="button" id="statsPrev" class="step-arrow-btn" aria-label="上一期">‹</button><span id="statsPeriod" class="cal-month-text"></span><button type="button" id="statsNext" class="step-arrow-btn" aria-label="下一期">›</button></div>
+      <div id="statsContent"></div>
+    </div>
+  </div>
   <div id="calendarSheet" class="bottom-sheet-mask" role="dialog" aria-modal="true" aria-labelledby="calSheetHeading">
     <div class="bottom-sheet-card">
       <div class="sheet-handle"></div>
@@ -1768,6 +1783,7 @@
         <button type="button" id="closeCalBtn" class="sheet-dismiss-btn" aria-label="關閉月曆">✕</button>
       </div>
 
+      <button type="button" id="openStatsBtn" class="secondary-btn" style="width:100%;margin-bottom:12px;">▥ 週／月營養統計</button>
       <div class="cal-month-switcher">
         <button type="button" id="calPrevMonthBtn" class="step-arrow-btn" aria-label="上個月">‹</button>
         <span id="calMonthLabel" class="cal-month-text tabular">2026年 11月</span>
@@ -1875,7 +1891,7 @@
           <button type="button" id="importBackupBtn" class="secondary-btn">📥 匯入 JSON 還原</button>
           <input type="file" id="importBackupFile" accept=".json,application/json" style="display: none;" />
         </div>
-        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V9.4</div>
+        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V10.0</div>
         <div class="backup-hint-box">
           資料皆安全儲存於此裝置本機空間。刪除主畫面書籤或更換手機前，請先匯出 JSON 備份。
         </div>
@@ -2688,6 +2704,50 @@
       // ======================================================================
       // 7. 月曆總覽 Bottom Sheet 渲染
       // ======================================================================
+      let statsMode='week', statsAnchor='';
+      function statsBounds() {
+        const [y,m,d]=statsAnchor.split('-').map(Number);
+        if(statsMode==='week') {
+          const start=addDays(statsAnchor,-((new Date(y,m-1,d).getDay()+6)%7));
+          return [start,addDays(start,6)];
+        }
+        const start=statsAnchor.slice(0,7)+'-01';
+        return [start,addDays(start,new Date(y,m,0).getDate()-1)];
+      }
+      function renderStats() {
+        const [start,end]=statsBounds(), today=getTodayStr(), rows=[];
+        for(let date=start;date<=end;date=addDays(date,1)){
+          const logs=date<=today?getLogsForDate(date):[];
+          rows.push({date,has:logs.length>0,cal:round1(logs.reduce((s,e)=>s+e.cal,0)),pro:round1(logs.reduce((s,e)=>s+e.pro,0))});
+        }
+        const logged=rows.filter(r=>r.has), n=logged.length;
+        const avg=k=>n?fmtNum(round1(logged.reduce((s,r)=>s+r[k],0)/n)):'—';
+        const calHit=logged.filter(r=>r.cal<=settings.calGoal).length, proHit=logged.filter(r=>r.pro>=settings.proGoal).length;
+        const rate=v=>n?Math.round(v/n*100)+'%':'—';
+        const tile=(label,value,sub)=>'<div class="stats-tile"><div class="stats-label">'+label+'</div><div class="stats-value tabular">'+value+'</div><div class="stats-label">'+sub+'</div></div>';
+        function chart(key,goal,title,unit) {
+          const max=Math.max(1,goal,...logged.map(r=>r[key]))*1.12, w=310/rows.length;
+          const y=v=>105-v/max*88;
+          const bars=rows.map((r,i)=>{
+            const x=25+i*w, color=key==='pro'?'var(--accent-pro)':r.cal<2000?'#30bb8a':r.cal<=2200?'#e8a04b':'#e66c80';
+            return (r.has?'<rect x="'+(x+w*.18)+'" y="'+y(r[key])+'" width="'+w*.64+'" height="'+Math.max(0,105-y(r[key]))+'" rx="2" fill="'+color+'"><title>'+r.date+' '+r[key]+' '+unit+'</title></rect>':'<circle cx="'+(x+w/2)+'" cy="105" r="1.5" fill="currentColor" opacity=".3"/>')+
+              ((rows.length<=7||i%5===0||i===rows.length-1)?'<text x="'+(x+w/2)+'" y="120" text-anchor="middle" font-size="9" fill="currentColor">'+Number(r.date.slice(-2))+'</text>':'');
+          }).join('');
+          return '<div class="stats-chart"><div class="stats-label">'+title+'（'+unit+'） · 虛線為目標 '+fmtNum(goal)+'</div><svg viewBox="0 0 340 128" role="img" aria-label="'+title+'"><line x1="25" x2="335" y1="'+y(goal)+'" y2="'+y(goal)+'" stroke="currentColor" opacity=".5" stroke-dasharray="4 3"/><text x="23" y="'+(y(goal)-3)+'" text-anchor="end" font-size="8" fill="currentColor">'+goal+'</text>'+bars+'</svg></div>';
+        }
+        document.getElementById('statsPeriod').textContent=start.slice(5)+' ～ '+end.slice(5)+' / '+start.slice(0,4);
+        document.getElementById('statsWeek').classList.toggle('active',statsMode==='week');
+        document.getElementById('statsMonth').classList.toggle('active',statsMode==='month');
+        document.getElementById('statsNext').disabled=end>=today;
+        document.getElementById('statsContent').innerHTML='<div class="stats-grid">'+tile('平均每日熱量',avg('cal')+' kcal','目標 '+settings.calGoal+' kcal')+tile('平均每日蛋白質',avg('pro')+' g','目標 '+settings.proGoal+' g')+tile('熱量未超標',rate(calHit),calHit+' / '+n+' 個記錄日')+tile('蛋白質達標',rate(proHit),proHit+' / '+n+' 個記錄日')+'</div>'+chart('cal',settings.calGoal,'每日熱量','kcal')+chart('pro',settings.proGoal,'每日蛋白質','g')+'<p class="stats-note">已記錄 '+n+' / '+rows.filter(r=>r.date<=today).length+' 個已過或當天日期。未記錄日不計入平均與達標率；今日可能尚未記錄完整。歷史統計以目前設定目標計算。</p>';
+      }
+      function shiftStats(delta) {
+        const [start]=statsBounds();
+        const [y,m]=start.split('-').map(Number);
+        if(statsMode==='week') statsAnchor=addDays(start,delta*7);
+        else {const d=new Date(y,m-1+delta,1);statsAnchor=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';}
+        renderStats();
+      }
       function openCalendarModal() {
         const [y, m] = selectedDate.split('-').map(Number);
         calMonthYear = y;
@@ -3185,6 +3245,12 @@
 
         // 月曆 Bottom Sheet
         document.getElementById('openCalBtn').addEventListener('click', openCalendarModal);
+        document.getElementById('openStatsBtn').addEventListener('click',()=>{statsAnchor=selectedDate>getTodayStr()?getTodayStr():selectedDate;statsMode='week';document.getElementById('calendarSheet').classList.remove('open');renderStats();document.getElementById('statsSheet').classList.add('open');});
+        document.getElementById('closeStatsBtn').addEventListener('click',()=>{document.getElementById('statsSheet').classList.remove('open');document.getElementById('calendarSheet').classList.add('open');});
+        document.getElementById('statsWeek').addEventListener('click',()=>{statsMode='week';renderStats();});
+        document.getElementById('statsMonth').addEventListener('click',()=>{statsMode='month';renderStats();});
+        document.getElementById('statsPrev').addEventListener('click',()=>shiftStats(-1));
+        document.getElementById('statsNext').addEventListener('click',()=>shiftStats(1));
         document.getElementById('closeCalBtn').addEventListener('click', () => {
           document.getElementById('calendarSheet').classList.remove('open');
         });
