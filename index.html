@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
   <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
-  <title>Pure Nutrition Tracker v10.0.1 — 個人健康與飲食儀表板</title>
+  <title>Pure Nutrition Tracker v10.0.2 — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
        1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
@@ -1547,6 +1547,25 @@
         margin: -22px -22px -10px;
       }
     }
+    #saveAsPresetToggle {
+      display: flex;
+      width: 100%;
+      min-height: 48px;
+      box-sizing: border-box;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      font-size: 0.88rem;
+      border-radius: var(--radius-input);
+      touch-action: manipulation;
+    }
+    #saveAsPresetToggle.checked, #saveAsPresetToggle[aria-pressed="true"] {
+      background-color: var(--accent-pro-soft);
+      border-color: var(--accent-pro);
+      color: var(--accent-pro-ink);
+    }
+    #saveAsPresetStateTag { flex-shrink: 0; }
+    .save-shortcut-btn.saved { border-color: var(--accent-pro); color: var(--accent-pro-ink); }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
   <link rel="icon" type="image/png" href="./apple-touch-icon.png" />
@@ -1910,7 +1929,7 @@
           <button type="button" id="importBackupBtn" class="secondary-btn">📥 匯入 JSON 還原</button>
           <input type="file" id="importBackupFile" accept=".json,application/json" style="display: none;" />
         </div>
-        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V10.0.1</div>
+        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V10.0.2</div>
         <div class="backup-hint-box">
           資料皆安全儲存於此裝置本機空間。刪除主畫面書籤或更換手機前，請先匯出 JSON 備份。
         </div>
@@ -3215,6 +3234,7 @@
             });
             savePresets();
             renderQuickLogModule();
+            renderTimelineSection();
           }
 
           nameInput.value = '';
