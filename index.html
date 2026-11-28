@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
   <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
-  <title>Pure Nutrition Tracker v9.3 — 個人健康與飲食儀表板</title>
+  <title>Pure Nutrition Tracker v9.4 — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
        1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
@@ -413,7 +413,7 @@
     /* 次級 60% / 40% 非對稱分割列 */
     .asymmetric-split-row {
       display: grid;
-      grid-template-columns: 1.5fr 1fr; /* 60% / 40% */
+      grid-template-columns: minmax(0, 52fr) minmax(0, 48fr); /* 52% / 48% */
       gap: 12px;
     }
 
@@ -1511,6 +1511,17 @@
       from { transform: translateY(12px) scale(0.96); opacity: 0; }
       to { transform: translateY(0) scale(1); opacity: 1; }
     }
+    .hero-ratio-line { font-size: 0.88rem; gap: 5px; }
+    .protein-focus-card { gap: 5px; padding: 14px 12px; min-width: 0; }
+    .protein-ring-box { width: 86px; height: 86px; align-self: center; }
+    .protein-ring-box .ring-fg-arc { stroke: var(--accent-pro); }
+    .protein-ring-box .ring-pct-main { font-size: 1.15rem; }
+    .protein-ring-box .ring-sub-txt { font-size: 0.58rem; }
+    .protein-focus-card .pro-big-row { justify-content: center; flex-wrap: wrap; }
+    .protein-focus-card .pro-grams-val { font-size: 1.45rem; }
+    .protein-focus-card .pro-remain-caption { text-align: center; }
+    .sparkline-card { min-width: 0; }
+    .sparkline-card .spark-canvas-wrap { flex: 1; min-height: 68px; max-height: 125px; }
   </style>
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
   <link rel="icon" type="image/png" href="./apple-touch-icon.png" />
@@ -1586,15 +1597,23 @@
         <div class="bento-surface protein-focus-card">
           <div class="bento-sub-header">
             <span class="bento-sub-title"><i class="pro-indicator-dot"></i>蛋白質達成率</span>
-            <span id="proPctChip" class="pro-pct-chip tabular">0%</span>
+
+          </div>
+          <div class="hero-ring-box protein-ring-box" role="img" aria-label="蛋白質達成率">
+            <svg class="hero-ring-svg" viewBox="0 0 108 108" aria-hidden="true">
+              <circle class="ring-bg-track" cx="54" cy="54" r="44"></circle>
+              <circle id="proRingArc" class="ring-fg-arc" cx="54" cy="54" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"></circle>
+            </svg>
+            <div class="ring-center-overlay">
+              <span id="proPctChip" class="ring-pct-main tabular">0%</span>
+              <span class="ring-sub-txt">蛋白質達成</span>
+            </div>
           </div>
           <div class="pro-big-row tabular">
             <span id="proCurrentNum" class="pro-grams-val">0</span>
             <span class="pro-grams-goal">/ <span id="proGoalNum">100</span>g</span>
           </div>
-          <div class="pro-bar-track">
-            <div id="proBarFill" class="pro-bar-fill"></div>
-          </div>
+
           <div id="proRemainText" class="pro-remain-caption tabular">還差 100g 達標</div>
         </div>
 
@@ -1856,7 +1875,7 @@
           <button type="button" id="importBackupBtn" class="secondary-btn">📥 匯入 JSON 還原</button>
           <input type="file" id="importBackupFile" accept=".json,application/json" style="display: none;" />
         </div>
-        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V9.3</div>
+        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V9.4</div>
         <div class="backup-hint-box">
           資料皆安全儲存於此裝置本機空間。刪除主畫面書籤或更換手機前，請先匯出 JSON 備份。
         </div>
@@ -2297,7 +2316,8 @@
         document.getElementById('proPctChip').textContent = `${proPct}%`;
         document.getElementById('proCurrentNum').textContent = fmtNum(consumedPro);
         document.getElementById('proGoalNum').textContent = fmtNum(proGoal);
-        document.getElementById('proBarFill').style.width = `${Math.min(100, proPct)}%`;
+        document.getElementById('proRingArc').style.strokeDashoffset = String(276.46 * (1 - Math.min(1, Math.max(0, proRatio))));
+        document.querySelector('.protein-ring-box').setAttribute('aria-label', `蛋白質達成率 ${proPct}%`);
 
         const proRemainEl = document.getElementById('proRemainText');
         if (proRemain <= 0) {
