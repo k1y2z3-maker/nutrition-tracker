@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="飲食追蹤" />
   <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)" />
-  <title>Pure Nutrition Tracker v9.2.3 — 個人健康與飲食儀表板</title>
+  <title>Pure Nutrition Tracker v9.3 — 個人健康與飲食儀表板</title>
   <style>
     /* ==========================================================================
        1. Apple Health / iOS Design Tokens (低飽和中性色系統 · 淺色 / OLED 深色)
@@ -1088,6 +1088,21 @@
       font-weight: 700;
     }
 
+    .copy-meal-btn {
+      display: block;
+      margin: 4px 0 8px auto;
+      padding: 7px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-cal-soft);
+      color: var(--accent-cal);
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+    .dup-plus-btn { white-space: nowrap; }
+    .timeline-row:has(.dup-plus-btn[title="複製到今天"]) { flex-wrap: wrap; }
+    .timeline-row:has(.dup-plus-btn[title="複製到今天"]) .timeline-row-main { flex-basis: 100%; }
+    .timeline-row:has(.dup-plus-btn[title="複製到今天"]) .timeline-row-btns { margin-left: auto; }
+
     .del-cross-btn {
       width: 30px;
       height: 30px;
@@ -1841,7 +1856,7 @@
           <button type="button" id="importBackupBtn" class="secondary-btn">📥 匯入 JSON 還原</button>
           <input type="file" id="importBackupFile" accept=".json,application/json" style="display: none;" />
         </div>
-        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V9.2.3</div>
+        <div id="appVersionInfo" style="font-size:0.75rem;color:var(--ink-secondary);margin-top:10px;">App V9.3</div>
         <div class="backup-hint-box">
           資料皆安全儲存於此裝置本機空間。刪除主畫面書籤或更換手機前，請先匯出 JSON 備份。
         </div>
@@ -2518,7 +2533,25 @@
         );
       }
 
+      function copyEntriesToToday(entries) {
+        const today = getTodayStr();
+        if (selectedDate >= today || !entries.length) return;
+        const copies = entries.map(entry => ({
+          ...entry,
+          id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10),
+          time: getCurrentHHMM()
+        }));
+        try {
+          localStorage.setItem(STORAGE_KEYS.LOG_PREFIX + today, JSON.stringify([...copies, ...getLogsForDate(today)]));
+        } catch (e) {
+          showToast('複製失敗，請檢查儲存空間');
+          return;
+        }
+        showToast(copies.length === 1 ? `已複製到今天：${copies[0].name}` : `已複製 ${copies.length} 筆餐點到今天`);
+      }
+
       function renderTimelineSection() {
+        const isHistory = selectedDate < getTodayStr();
         const logs = getLogsForDate(selectedDate);
         const container = document.getElementById('timelineGroupsContainer');
         document.getElementById('timelineCountBadge').textContent = `${logs.length} 筆`;
@@ -2558,6 +2591,16 @@
             </div>
           `;
 
+          if (isHistory) {
+            const copyMeal = document.createElement('button');
+            copyMeal.type = 'button';
+            copyMeal.className = 'copy-meal-btn';
+            copyMeal.textContent = '整餐複製到今天';
+            copyMeal.addEventListener('click', () => {
+              if (confirm(`將 ${mealKey}的 ${entries.length} 筆餐點（${fmtNum(subCal)} kcal）複製到今天？`)) copyEntriesToToday(entries);
+            });
+            section.appendChild(copyMeal);
+          }
           const card = document.createElement('div');
           card.className = 'meal-items-card';
 
@@ -2580,7 +2623,7 @@
                 <button type="button" class="save-shortcut-btn ${alreadySaved ? 'saved' : ''}" title="${alreadySaved ? '已在常用快捷中' : '存為常用快捷'}">
                   ${alreadySaved ? '★ 已存快捷' : '☆ 存為快捷'}
                 </button>
-                <button type="button" class="dup-plus-btn" title="再記一筆">+1</button>
+                <button type="button" class="dup-plus-btn" title="${isHistory ? '複製到今天' : '再記一筆'}">${isHistory ? '複製到今天' : '+1'}</button>
                 <button type="button" class="del-cross-btn" aria-label="刪除紀錄">×</button>
               </div>
             `;
@@ -2594,6 +2637,7 @@
             });
 
             row.querySelector('.dup-plus-btn').addEventListener('click', () => {
+              if (isHistory) { copyEntriesToToday([entry]); return; }
               addLogEntry({
                 name: entry.name,
                 category: entry.category,
